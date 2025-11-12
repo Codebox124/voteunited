@@ -43,7 +43,7 @@ const politicians = [
 const Featured = () => {
   return (
     <div className="bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 pt-16 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-6">
           <div className="text-start mb-6">
             <h2 className="text-2xl md:text-4xl font-mont font-bold text-primary dark:text-white mb-3">
@@ -108,9 +108,9 @@ const Featured = () => {
                               <div>
                                 <p className="text-lg font-bold text-white flex gap-1 items-center fontmont">
                                   {politician.votes}
-                                  <p className="text-xs text-white fontroboto">
+                                  <span className="text-xs text-white fontroboto">
                                     Votes
-                                  </p>
+                                  </span>
                                 </p>
                               </div>
                               <div className=" flex gap-2 items-center">

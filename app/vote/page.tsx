@@ -1,9 +1,11 @@
+import AllPolitician from "./components/allPolitician";
 import Featured from "./components/featured";
+import Countdown from "./components/countdown";
 
 const Page = () => {
   return (
     <div>
-      <div className="max-w-7xl mx-auto text-center p-10">
+      <div className="md:max-w-7xl max-w-full mx-auto text-center p-10">
         <h2 className="text-4xl md:text-5xl font-mont font-bold text-primary font-mont dark:text-white mb-4">
           Vote Your Candidate
         </h2>
@@ -13,8 +15,15 @@ const Page = () => {
         </p>
       </div>
 
+      <div className="max-w-7xl mx-auto px-4 mb-10">
+        <Countdown />
+      </div>
+
       <div className="max-w-7xl mx-auto">
         <Featured />
+      </div>
+      <div className="max-w-7xl mx-auto">
+        <AllPolitician />
       </div>
     </div>
   );
