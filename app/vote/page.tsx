@@ -15,7 +15,7 @@ const Page = () => {
         </p>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 mb-10">
+      <div className="max-w-7xl mx-auto px-4 mb-8">
         <Countdown />
       </div>
 

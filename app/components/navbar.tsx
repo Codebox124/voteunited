@@ -33,7 +33,7 @@ export default function Navbar() {
               <Link href="/vote">Vote</Link>
             </Button>
             <Button variant="ghost" asChild className="text-base">
-              <Link href="/news">Resources</Link>
+              <Link href="/resources">Resources</Link>
             </Button>
           </nav>
 
@@ -74,10 +74,10 @@ export default function Navbar() {
               <Link href="/legislation">Legislation</Link>
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link href="/voting-places">Voting Places</Link>
+              <Link href="/vote">Vote</Link>
             </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link href="/news">News</Link>
+              <Link href="/resources">Resources</Link>
             </Button>
             <div className="flex flex-col gap-2 pt-2 border-t border-border">
               <Button

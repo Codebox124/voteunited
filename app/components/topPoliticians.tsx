@@ -47,7 +47,7 @@ const PoliticianCard = ({
   isTopRanked: boolean;
 }) => (
   <div
-    className={`bg-white dark:bg-slate-800 rounded-xl fontroboto overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 ${
+    className={`bg-white dark:bg-slate-800 rounded-none mb-4 fontroboto overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 ${
       isTopRanked ? "md:col-span-2 lg:col-span-2" : ""
     }`}
   >
@@ -117,18 +117,15 @@ const PoliticianCard = ({
 const TopPoliticians = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-mont font-bold text-primary dark:text-white mb-4">
+      <div className="max-w-7xl mx-auto px-8">
+        <div className="text-start mb-6">
+          <h2 className="text-2xl md:text-4xl font-mont font-bold text-primary dark:text-white mb-3">
             Top Politicians
           </h2>
-          <p className="text-lg text-slate-600 fontroboto dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-sm md:text-base text-muted-foreground fontroboto max-w-2xl">
             Meet the most influential political leaders shaping our future
           </p>
         </div>
-
-        {/* Politicians Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {politicians.map((politician, index) => (
             <PoliticianCard
