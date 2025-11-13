@@ -1,7 +1,16 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
+import { ThumbsDown, ThumbsUp, TrendingUp } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const AllPolitician = () => {
   const politicians = [
@@ -105,9 +114,57 @@ const AllPolitician = () => {
                   </div>
                 </div>
 
-                <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none w-full">
-                  View Profile
-                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none w-full">
+                      View Profile
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-xl">
+                    <DialogHeader>
+                      <DialogTitle className="fontmont">
+                        {politician.name}
+                      </DialogTitle>
+                      <DialogDescription className="fontroboto">
+                        {politician.position}
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="rounded-md border border-border overflow-hidden">
+                        <img
+                          src={politician.image}
+                          alt={politician.name}
+                          className="w-full h-40 object-cover"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="text-sm text-muted-foreground fontroboto">
+                          Rank
+                        </div>
+                        <div className="text-lg font-semibold text-foreground">
+                          #{politician.rank}
+                        </div>
+                        <div className="text-sm text-muted-foreground fontroboto">
+                          Votes
+                        </div>
+                        <div className="text-lg font-semibold text-primary fontmont">
+                          {politician.votes}
+                        </div>
+                        {politician.trending && (
+                          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
+                            <TrendingUp size={14} /> Trending
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button className="rounded-none">Vote Now</Button>
+                      <Button variant="outline" className="rounded-none">
+                        View Full Profile
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
