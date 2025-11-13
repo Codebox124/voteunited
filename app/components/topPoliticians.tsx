@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const politicians = [
   {
@@ -159,10 +160,9 @@ const PoliticianCard = ({
         </div>
       </div>
       <DialogFooter>
-        <Button className="rounded-none">Vote Now</Button>
-        <Button variant="outline" className="rounded-none">
-          View Full Profile
-        </Button>
+        <Link href={"/vote"}>
+          <Button className="rounded-none">Vote Now</Button>
+        </Link>
       </DialogFooter>
     </DialogContent>
   </Dialog>

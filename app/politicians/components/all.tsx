@@ -10,6 +10,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const politicians = [
   {
@@ -68,7 +69,11 @@ const PoliticianCard = ({
             "relative bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden"
           }
         >
-          <img src={politician.image} alt={politician.name} className="w-full h-full object-cover" />
+          <img
+            src={politician.image}
+            alt={politician.name}
+            className="w-full h-full object-cover"
+          />
           <div className="absolute top-4 left-4 flex gap-2">
             <span className="px-3 py-1 bg-slate-900/90 dark:bg-slate-100/90 text-white dark:text-slate-900 text-sm font-bold rounded-full">
               #{politician.rank}
@@ -83,11 +88,17 @@ const PoliticianCard = ({
         </div>
 
         {/* Content Section */}
-        <div className={`p-6 ${isTopRanked ? "flex flex-col justify-center" : ""}`}>
+        <div
+          className={`p-6 ${isTopRanked ? "flex flex-col justify-center" : ""}`}
+        >
           <div className="space-y-4">
             <div>
-              <h3 className={`font-bold text-slate-900 dark:text-white mb-1 ${isTopRanked ? "text-3xl" : "text-xl"}`}>{politician.name}</h3>
-              <p className="text-slate-600 dark:text-slate-400 font-medium">{politician.position}</p>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-3xl">
+                {politician.name}
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 font-medium">
+                {politician.position}
+              </p>
             </div>
 
             <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-700">
@@ -108,17 +119,27 @@ const PoliticianCard = ({
     <DialogContent className="sm:max-w-xl">
       <DialogHeader>
         <DialogTitle className="fontmont">{politician.name}</DialogTitle>
-        <DialogDescription className="fontroboto">{politician.position}</DialogDescription>
+        <DialogDescription className="fontroboto">
+          {politician.position}
+        </DialogDescription>
       </DialogHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="rounded-md border border-border overflow-hidden">
-          <img src={politician.image} alt={politician.name} className="w-full h-40 object-cover" />
+          <img
+            src={politician.image}
+            alt={politician.name}
+            className="w-full h-40 object-cover"
+          />
         </div>
         <div className="space-y-2">
           <div className="text-sm text-muted-foreground fontroboto">Rank</div>
-          <div className="text-lg font-semibold text-foreground">#{politician.rank}</div>
+          <div className="text-lg font-semibold text-foreground">
+            #{politician.rank}
+          </div>
           <div className="text-sm text-muted-foreground fontroboto">Votes</div>
-          <div className="text-lg font-semibold text-primary fontmont">{politician.votes}</div>
+          <div className="text-lg font-semibold text-primary fontmont">
+            {politician.votes}
+          </div>
           {politician.trending && (
             <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
               <TrendingUp size={14} /> Trending
@@ -127,8 +148,9 @@ const PoliticianCard = ({
         </div>
       </div>
       <DialogFooter>
-        <Button className="rounded-none">Vote Now</Button>
-        <Button variant="outline" className="rounded-none">View Full Profile</Button>
+        <Link href={"/vote"}>
+          <Button className="rounded-none">Vote Now</Button>
+        </Link>
       </DialogFooter>
     </DialogContent>
   </Dialog>
