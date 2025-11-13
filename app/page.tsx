@@ -1,7 +1,7 @@
-import React from "react";
 import Hero from "./components/hero";
 import TopPoliticians from "./components/topPoliticians";
 import Partners from "./components/partners";
+import FeaturedResources from "./components/featuredResources";
 
 const Page = () => {
   return (
@@ -9,6 +9,7 @@ const Page = () => {
       <Hero />
       <Partners />
       <TopPoliticians />
+      <FeaturedResources />
     </div>
   );
 };
