@@ -115,7 +115,7 @@ export default function NewsArticlePage() {
         <Button variant="ghost" asChild className="mb-6 -ml-2" size="sm">
           <Link href="/resources" className="gap-2">
             <ArrowLeft size={16} />
-            Back to News
+            Back to Resources
           </Link>
         </Button>
 
