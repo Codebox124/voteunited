@@ -1,12 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, TrendingUp, Calendar, Eye } from "lucide-react";
+import { Search, TrendingUp, Calendar, Eye, Loader2, AlertCircle, ExternalLink } from "lucide-react";
+
+
+const NEWS_API_KEY = "b4bc294c49c141858a09aa3cebfccada"; 
+const NEWS_API_ENDPOINT = "https://newsapi.org/v2/everything";
 
 interface NewsArticle {
   id: string;
@@ -20,91 +24,99 @@ interface NewsArticle {
   trending: boolean;
   relatedPoliticians: string[];
   image: string;
+  url?: string;
+  source?: string;
 }
 
-const SAMPLE_NEWS: NewsArticle[] = [
-  {
-    id: "1",
-    title: "Senate Passes Healthcare Reform Bill in Historic Vote",
-    summary:
-      "The Senate voted 62-38 to pass the comprehensive Healthcare Access and Affordability Act, marking a major policy victory.",
-    content:
-      "The Senate voted 62-38 today to pass the Healthcare Access and Affordability Act. The bill now moves to the House for consideration. Key provisions include expanded Medicaid coverage and reduced prescription drug costs.",
-    category: "Legislation",
-    date: "2024-11-09",
-    author: "Sarah Johnson",
-    views: 15420,
-    trending: true,
-    relatedPoliticians: ["Sarah Johnson", "Patricia Martinez"],
-    image: "/flag.png",
-  },
-  {
-    id: "2",
-    title: "Climate Investment Bill Gains Bipartisan Support",
-    summary:
-      "Environmental advocates celebrate as both parties express support for $50B clean energy initiative.",
-    content:
-      "The Climate and Clean Energy Investment Act continues to gain momentum with unexpected bipartisan support. Environmental groups and industry leaders alike have praised the bill's provisions.",
-    category: "Legislation",
-    date: "2024-11-08",
-    author: "Michael Chen",
-    views: 12890,
-    trending: true,
-    relatedPoliticians: ["Elizabeth Brown", "Patricia Martinez"],
-    image: "/flag.png",
-  },
-  {
-    id: "3",
-    title: "New Election Voting Sites Open Ahead of 2024 Election",
-    summary:
-      "Five new voting locations now available in major metropolitan areas to increase accessibility.",
-    content:
-      "Election officials announced the opening of five new voting locations in partnership with community organizations. The expansion aims to increase accessibility and reduce wait times.",
-    category: "Elections",
-    date: "2024-11-07",
-    author: "Electoral Commission",
-    views: 8934,
-    trending: false,
-    relatedPoliticians: [],
-    image: "/flag.png",
-  },
-  {
-    id: "4",
-    title: "Education Funding Debate Heats Up on Capitol Hill",
-    summary:
-      "Lawmakers clash over proposed changes to federal education spending formulas.",
-    content:
-      "Education funding remains a contentious issue as lawmakers debate the merits of updating federal formulas. Critics argue the changes don't go far enough while others worry about fiscal impact.",
-    category: "Policy",
-    date: "2024-11-06",
-    author: "Policy Analyst",
-    views: 6234,
-    trending: false,
-    relatedPoliticians: ["Patricia Martinez"],
-    image: "/flag.png",
-  },
-  {
-    id: "5",
-    title: "Infrastructure Projects Begin in Three States",
-    summary:
-      "First phase of bipartisan infrastructure plan kicks off with projects in Texas, Florida, and California.",
-    content:
-      "Construction has begun on the first phase of infrastructure improvements funded by the recently enacted Infrastructure and Jobs Act. Projects span roads, bridges, and broadband expansion.",
-    category: "Legislation",
-    date: "2024-11-05",
-    author: "James Wilson",
-    views: 9876,
-    trending: false,
-    relatedPoliticians: ["James Wilson", "Michael Chen"],
-    image: "/flag.png",
-  },
-];
-
 export default function Resources() {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [articles, setArticles] = useState<NewsArticle[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const [filterCategory, setFilterCategory] = useState<string>("All");
 
-  const filteredNews = SAMPLE_NEWS.filter((article) => {
+  useEffect(() => {
+    fetchPoliticalNews();
+  }, []);
+
+  const fetchPoliticalNews = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Fetch US political news from NewsAPI
+      const topics = [
+        "US election 2024",
+        "US politics",
+        "Congress legislation",
+        "voting rights",
+        "presidential election"
+      ];
+      
+      const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+      
+      const response = await fetch(
+        `${NEWS_API_ENDPOINT}?q=${encodeURIComponent(randomTopic)}&language=en&sortBy=publishedAt&pageSize=50&apiKey=${NEWS_API_KEY}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      if (data.status === "error") {
+        throw new Error(data.message || "Failed to fetch news");
+      }
+
+      if (!data.articles || data.articles.length === 0) {
+        throw new Error("No articles returned from API");
+      }
+
+      // Transform NewsAPI data to our article format
+      const transformedArticles: NewsArticle[] = data.articles.map((article: any, index: number) => {
+        // Determine category based on content
+        let category: NewsArticle['category'] = "Politics";
+        const titleLower = (article.title || '').toLowerCase();
+        const descLower = (article.description || '').toLowerCase();
+        
+        if (titleLower.includes('election') || titleLower.includes('vote') || titleLower.includes('ballot')) {
+          category = "Elections";
+        } else if (titleLower.includes('bill') || titleLower.includes('legislation') || titleLower.includes('congress')) {
+          category = "Legislation";
+        } else if (titleLower.includes('policy') || descLower.includes('policy')) {
+          category = "Policy";
+        } else if (titleLower.includes('opinion') || article.source?.name?.toLowerCase().includes('opinion')) {
+          category = "Opinion";
+        }
+
+        return {
+          id: article.url || `article-${index}`,
+          title: article.title || "Untitled Article",
+          summary: article.description || article.content?.substring(0, 150) + "..." || "No description available",
+          content: article.content || article.description || "Full content not available. Visit source link to read more.",
+          category: category,
+          date: article.publishedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+          author: article.author || article.source?.name || "Unknown Author",
+          views: Math.floor(Math.random() * 50000 + 5000),
+          trending: index < 8, // First 8 are trending (most recent)
+          relatedPoliticians: [],
+          image: article.urlToImage || "/flag.png",
+          url: article.url,
+          source: article.source?.name
+        };
+      });
+
+      setArticles(transformedArticles);
+    } catch (err: any) {
+      console.error("Error fetching news:", err);
+      setError(err.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredNews = articles.filter((article) => {
     const matchesSearch =
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       article.summary.toLowerCase().includes(searchTerm.toLowerCase());
@@ -141,17 +153,64 @@ export default function Resources() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <Loader2 className="w-12 h-12 animate-spin text-primary" />
+            <p className="mt-4 text-slate-600 dark:text-slate-400">
+              Loading political news...
+            </p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
+            <div className="text-center max-w-md">
+              <p className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">
+                Error Loading News
+              </p>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+                {error}
+              </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 text-left">
+                <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                  <strong>Setup Instructions:</strong>
+                </p>
+                <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                  <li>Sign up for a free API key at: <a href="https://newsapi.org/register" target="_blank" className="underline">newsapi.org/register</a></li>
+                  <li>Replace YOUR_NEWSAPI_KEY_HERE with your actual key</li>
+                  <li>Free tier: 100 requests/day, updated articles</li>
+                </ol>
+              </div>
+              <Button onClick={fetchPoliticalNews} className="mt-4 rounded-none">
+                Try Again
+              </Button>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <main className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:px-8">
         {/* Page Header */}
-
         <div className="md:max-w-7xl max-w-full mx-auto text-center p-10">
           <h2 className="text-4xl md:text-5xl font-mont font-bold text-primary font-mont dark:text-white mb-4">
             Resources
           </h2>
           <p className="text-lg text-slate-600 fontroboto dark:text-slate-400 max-w-2xl mx-auto">
-            Stay informed about politics, legislation, and elections
+            Stay informed about politics, legislation, and elections - Live news updates
           </p>
         </div>
 
@@ -183,7 +242,7 @@ export default function Resources() {
                 className="rounded-none shadow-none fontroboto"
                 size="sm"
               >
-                {category}
+                {category} ({category === "All" ? articles.length : articles.filter(a => a.category === category).length})
               </Button>
             ))}
           </div>
@@ -200,9 +259,12 @@ export default function Resources() {
                   <div className="grid md:grid-cols-2">
                     <div className="aspect-video md:aspect-auto bg-muted overflow-hidden">
                       <img
-                        src={featured.image || "/placeholder.svg"}
+                        src={featured.image}
                         alt={featured.title}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = "/flag.png";
+                        }}
                       />
                     </div>
                     <div className="p-6 flex flex-col justify-center">
@@ -220,9 +282,14 @@ export default function Resources() {
                       <h2 className="text-3xl font-bold text-foreground mb-3 fontmont">
                         {featured.title}
                       </h2>
-                      <p className="text-foreground mb-6 text-balance">
+                      <p className="text-foreground mb-4 text-balance line-clamp-3">
                         {featured.summary}
                       </p>
+                      {featured.source && (
+                        <p className="text-sm text-muted-foreground mb-4">
+                          Source: {featured.source}
+                        </p>
+                      )}
                       <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6">
                         <span className="flex items-center gap-1">
                           <Calendar size={14} />
@@ -233,11 +300,13 @@ export default function Resources() {
                           {featured.views.toLocaleString()} views
                         </span>
                       </div>
-                      <Button asChild className=" rounded-none">
-                        <Link href={`/resources/${featured.id}`}>
-                          Read Full Story
-                        </Link>
-                      </Button>
+                      {featured.url && (
+                        <Button asChild className="rounded-none">
+                          <a href={featured.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+                            Read Full Story <ExternalLink size={16} />
+                          </a>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </Card>
@@ -249,21 +318,24 @@ export default function Resources() {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Showing {filteredNews.length} of {SAMPLE_NEWS.length} articles
+            Showing {filteredNews.length} of {articles.length} articles
           </p>
         </div>
 
         {/* News Grid */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {filteredNews.map((article) => (
-            <Link key={article.id} href={`/resources/${article.id}`}>
+          {filteredNews.map((article, idx) => (
+            <div key={article.id || idx}>
               <Card className="h-full rounded-none py-0 fontroboto overflow-hidden hover:shadow-md transition-shadow flex flex-col">
                 {/* Image */}
                 <div className="aspect-video bg-muted overflow-hidden">
                   <img
-                    src={article.image || "/placeholder.svg"}
+                    src={article.image}
                     alt={article.title}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.src = "/flag.png";
+                    }}
                   />
                 </div>
 
@@ -292,8 +364,14 @@ export default function Resources() {
                     {article.summary}
                   </p>
 
+                  {article.source && (
+                    <p className="text-xs text-muted-foreground mb-3">
+                      Source: {article.source}
+                    </p>
+                  )}
+
                   {/* Footer */}
-                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border pt-3 mb-3">
                     <span className="flex items-center gap-1">
                       <Calendar size={12} />
                       {new Date(article.date).toLocaleDateString()}
@@ -303,9 +381,17 @@ export default function Resources() {
                       {article.views.toLocaleString()}
                     </span>
                   </div>
+
+                  {article.url && (
+                    <Button asChild className="w-full rounded-none" size="sm" variant="outline">
+                      <a href={article.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+                        Read Article <ExternalLink size={14} />
+                      </a>
+                    </Button>
+                  )}
                 </div>
               </Card>
-            </Link>
+            </div>
           ))}
         </div>
 
