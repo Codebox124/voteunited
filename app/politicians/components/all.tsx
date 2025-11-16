@@ -66,7 +66,7 @@ const PoliticianCard = ({
       >
         <div
           className={
-            "relative bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden"
+            "relative  from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden"
           }
         >
           <img
@@ -158,7 +158,7 @@ const PoliticianCard = ({
 
 const Politicians = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen  from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto px-8">
         <div className="text-start mb-6">
           <h2 className="text-2xl md:text-4xl font-mont font-bold text-primary dark:text-white mb-3">
