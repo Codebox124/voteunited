@@ -93,7 +93,7 @@ const PoliticianCard = ({
         >
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-3xl">
+              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-xl">
                 {politician.name}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 font-medium">

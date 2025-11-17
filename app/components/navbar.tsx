@@ -26,8 +26,8 @@ export default function Navbar() {
             <Button variant="ghost" asChild className="text-base">
               <Link href="/politicians">Politicians</Link>
             </Button>
-            <Button variant="ghost" asChild className="text-base hidden">
-              <Link href="/legislation">Legislation</Link>
+            <Button variant="ghost" asChild className="text-base ">
+              <Link href="/bills">Bills</Link>
             </Button>
             <Button variant="ghost" asChild className="text-base">
               <Link href="/vote">Vote</Link>
@@ -69,6 +69,9 @@ export default function Navbar() {
           <nav className="border-t border-border py-4 md:hidden space-y-2">
             <Button variant="ghost" className="w-full justify-start" asChild>
               <Link href="/politicians">Politicians</Link>
+            </Button>
+            <Button variant="ghost" className="w-full justify-start" asChild>
+              <Link href="/bills">Bills</Link>
             </Button>
 
             <Button variant="ghost" className="w-full justify-start" asChild>

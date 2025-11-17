@@ -13,7 +13,6 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-
 const CONGRESS_API_KEY = "g4g9hInpzEbA7vb3j0rqCpNb40YcfUj2zRKed27i";
 const CURRENT_CONGRESS = "119";
 
@@ -52,7 +51,7 @@ const PoliticianCard = ({
           <img
             src={politician.image}
             alt={politician.name}
-            className="w-full h-full object-contain"
+            className="w-full h-full object-fill"
             onError={(e) => {
               e.currentTarget.src = "/flag.png";
             }}
@@ -70,10 +69,12 @@ const PoliticianCard = ({
           </div>
         </div>
 
-        <div className={`p-6 ${isTopRanked ? "flex flex-col justify-center" : ""}`}>
+        <div
+          className={`p-6 ${isTopRanked ? "flex flex-col justify-center" : ""}`}
+        >
           <div className="space-y-4">
             <div>
-              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-3xl">
+              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-xl">
                 {politician.name}
               </h3>
               <p className="text-slate-600 dark:text-slate-400 font-medium">
@@ -126,7 +127,9 @@ const PoliticianCard = ({
           </div>
           {politician.party && (
             <>
-              <div className="text-sm text-muted-foreground fontroboto">Party</div>
+              <div className="text-sm text-muted-foreground fontroboto">
+                Party
+              </div>
               <div className="text-lg font-semibold text-foreground">
                 {politician.party}
               </div>
@@ -134,7 +137,9 @@ const PoliticianCard = ({
           )}
           {politician.state && (
             <>
-              <div className="text-sm text-muted-foreground fontroboto">State</div>
+              <div className="text-sm text-muted-foreground fontroboto">
+                State
+              </div>
               <div className="text-lg font-semibold text-foreground">
                 {politician.state}
               </div>
@@ -153,7 +158,9 @@ const PoliticianCard = ({
       </div>
       {politician.bio && (
         <div className="mt-4">
-          <div className="text-sm text-muted-foreground fontroboto mb-1">Biography</div>
+          <div className="text-sm text-muted-foreground fontroboto mb-1">
+            Biography
+          </div>
           <p className="text-sm text-foreground">{politician.bio}</p>
         </div>
       )}
@@ -187,7 +194,9 @@ const Politicians = () => {
       );
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `API Error: ${response.status} - ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -197,45 +206,52 @@ const Politicians = () => {
       }
 
       // Transform API data to our politician format
-      const transformedPoliticians: Politician[] = data.members.map((member: any, index: number) => {
-        // Get party full name
-        const partyMap: Record<string, string> = {
-          'R': 'Republican',
-          'D': 'Democratic',
-          'I': 'Independent'
-        };
+      const transformedPoliticians: Politician[] = data.members.map(
+        (member: any, index: number) => {
+          // Get party full name
+          const partyMap: Record<string, string> = {
+            R: "Republican",
+            D: "Democratic",
+            I: "Independent",
+          };
 
-        // Determine position based on terms
-        let position = "Member of Congress";
-        if (member.terms && member.terms.item) {
-          const latestTerm = Array.isArray(member.terms.item) 
-            ? member.terms.item[member.terms.item.length - 1] 
-            : member.terms.item;
-          
-          if (latestTerm.chamber === 'Senate') {
-            position = 'U.S. Senator';
-          } else if (latestTerm.chamber === 'House of Representatives') {
-            position = 'U.S. Representative';
+          // Determine position based on terms
+          let position = "Member of Congress";
+          if (member.terms && member.terms.item) {
+            const latestTerm = Array.isArray(member.terms.item)
+              ? member.terms.item[member.terms.item.length - 1]
+              : member.terms.item;
+
+            if (latestTerm.chamber === "Senate") {
+              position = "U.S. Senator";
+            } else if (latestTerm.chamber === "House of Representatives") {
+              position = "U.S. Representative";
+            }
           }
+
+          // Generate image URL from bioguideId
+          const imageUrl =
+            member.depiction?.imageUrl ||
+            `https://bioguide.congress.gov/bioguide/photo/${member.bioguideId[0]}/${member.bioguideId}.jpg`;
+
+          return {
+            id: member.bioguideId,
+            name:
+              member.name ||
+              `${member.firstName || ""} ${member.lastName || ""}`.trim(),
+            position: position,
+            image: imageUrl,
+            party: partyMap[member.partyName] || member.partyName,
+            state: member.state || "",
+            votes: Math.floor(Math.random() * 5000).toLocaleString(),
+            trending: Math.random() > 0.7,
+            rank: index + 1,
+            bio: member.officialWebsiteUrl
+              ? `Official website: ${member.officialWebsiteUrl}`
+              : "",
+          };
         }
-
-        // Generate image URL from bioguideId
-        const imageUrl = member.depiction?.imageUrl || 
-          `https://bioguide.congress.gov/bioguide/photo/${member.bioguideId[0]}/${member.bioguideId}.jpg`;
-
-        return {
-          id: member.bioguideId,
-          name: member.name || `${member.firstName || ''} ${member.lastName || ''}`.trim(),
-          position: position,
-          image: imageUrl,
-          party: partyMap[member.partyName] || member.partyName,
-          state: member.state || '',
-          votes: Math.floor(Math.random() * 5000).toLocaleString(),
-          trending: Math.random() > 0.7,
-          rank: index + 1,
-          bio: member.officialWebsiteUrl ? `Official website: ${member.officialWebsiteUrl}` : ''
-        };
-      });
+      );
 
       setPoliticians(transformedPoliticians);
     } catch (err: any) {
@@ -287,12 +303,26 @@ const Politicians = () => {
                   <strong>Setup Instructions:</strong>
                 </p>
                 <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
-                  <li>Sign up for a free API key at: <a href="https://api.congress.gov/sign-up/" target="_blank" className="underline">api.congress.gov/sign-up</a></li>
-                  <li>Replace YOUR_API_KEY_HERE in the code with your actual key</li>
+                  <li>
+                    Sign up for a free API key at:{" "}
+                    <a
+                      href="https://api.congress.gov/sign-up/"
+                      target="_blank"
+                      className="underline"
+                    >
+                      api.congress.gov/sign-up
+                    </a>
+                  </li>
+                  <li>
+                    Replace YOUR_API_KEY_HERE in the code with your actual key
+                  </li>
                   <li>The API allows 5,000 requests per hour</li>
                 </ol>
               </div>
-              <Button onClick={fetchCongressMembers} className="mt-4 rounded-none">
+              <Button
+                onClick={fetchCongressMembers}
+                className="mt-4 rounded-none"
+              >
                 Try Again
               </Button>
             </div>
@@ -303,14 +333,15 @@ const Politicians = () => {
   }
 
   return (
-    <div className="min-h-screen  from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen fontroboto from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto px-8">
         <div className="text-start mb-6">
           <h2 className="text-2xl md:text-4xl font-mont font-bold text-primary dark:text-white mb-3">
             Current Members of Congress
           </h2>
           <p className="text-sm md:text-base text-muted-foreground fontroboto max-w-2xl">
-            {CURRENT_CONGRESS}th Congress (2025-2027) - Live data from Congress.gov
+            {CURRENT_CONGRESS}th Congress (2025-2027) - Live data from
+            Congress.gov
           </p>
         </div>
 
@@ -318,7 +349,7 @@ const Politicians = () => {
         <div className="flex flex-wrap gap-3 mb-8">
           <button
             onClick={() => setFilter("all")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
               filter === "all"
                 ? "bg-primary text-white"
                 : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
@@ -328,49 +359,64 @@ const Politicians = () => {
           </button>
           <button
             onClick={() => setFilter("trending")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
               filter === "trending"
                 ? "bg-primary text-white"
                 : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
             }`}
           >
-            Trending ({politicians.filter((p: Politician) => p.trending).length})
+            Trending ({politicians.filter((p: Politician) => p.trending).length}
+            )
           </button>
           <button
             onClick={() => setFilter("republican")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
               filter === "republican"
                 ? "bg-primary text-white"
                 : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
             }`}
           >
-            Republican ({politicians.filter((p: Politician) => p.party === "Republican").length})
+            Republican (
+            {
+              politicians.filter((p: Politician) => p.party === "Republican")
+                .length
+            }
+            )
           </button>
           <button
             onClick={() => setFilter("democratic")}
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-none text-sm font-medium transition-colors ${
               filter === "democratic"
                 ? "bg-primary text-white"
                 : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
             }`}
           >
-            Democratic ({politicians.filter((p: Politician) => p.party === "Democratic").length})
+            Democratic (
+            {
+              politicians.filter((p: Politician) => p.party === "Democratic")
+                .length
+            }
+            )
           </button>
         </div>
 
         {filteredPoliticians.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-slate-600 dark:text-slate-400">No politicians found</p>
+            <p className="text-slate-600 dark:text-slate-400">
+              No politicians found
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {filteredPoliticians.map((politician: Politician, index: number) => (
-              <PoliticianCard
-                key={politician.id}
-                politician={politician}
-                isTopRanked={index === 0}
-              />
-            ))}
+            {filteredPoliticians.map(
+              (politician: Politician, index: number) => (
+                <PoliticianCard
+                  key={politician.id}
+                  politician={politician}
+                  isTopRanked={index === 0}
+                />
+              )
+            )}
           </div>
         )}
       </div>

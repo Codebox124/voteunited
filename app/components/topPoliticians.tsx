@@ -44,7 +44,7 @@ const PoliticianCard = ({
             <img
               src={politician.image}
               alt={politician.name}
-              className="w-full h-full object-contain"
+              className="w-full h-full object-fill"
               onError={(e) => {
                 e.currentTarget.src = "/flag.png";
               }}
@@ -110,7 +110,7 @@ const PoliticianCard = ({
         </DialogDescription>
       </DialogHeader>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="rounded-none border border-border overflow-hidden">
+        <div className="rounded-none border border-border h-fit overflow-hidden">
           <img
             src={politician.image}
             alt={politician.name}
@@ -127,7 +127,9 @@ const PoliticianCard = ({
           </div>
           {politician.party && (
             <>
-              <div className="text-sm text-muted-foreground fontroboto">Party</div>
+              <div className="text-sm text-muted-foreground fontroboto">
+                Party
+              </div>
               <div className="text-lg font-semibold text-foreground">
                 {politician.party}
               </div>
@@ -135,7 +137,9 @@ const PoliticianCard = ({
           )}
           {politician.state && (
             <>
-              <div className="text-sm text-muted-foreground fontroboto">State</div>
+              <div className="text-sm text-muted-foreground fontroboto">
+                State
+              </div>
               <div className="text-lg font-semibold text-foreground">
                 {politician.state}
               </div>
@@ -154,7 +158,9 @@ const PoliticianCard = ({
       </div>
       {politician.bio && (
         <div className="mt-4">
-          <div className="text-sm text-muted-foreground fontroboto mb-1">Biography</div>
+          <div className="text-sm text-muted-foreground fontroboto mb-1">
+            Biography
+          </div>
           <p className="text-sm text-foreground">{politician.bio}</p>
         </div>
       )}
@@ -200,7 +206,9 @@ const TopPoliticians = () => {
       );
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `API Error: ${response.status} - ${response.statusText}`
+        );
       }
 
       const data = await response.json();
@@ -210,50 +218,57 @@ const TopPoliticians = () => {
       }
 
       // Transform API data to our politician format
-      const transformedPoliticians: Politician[] = data.members.map((member: any, index: number) => {
-        // Get party full name
-        const partyMap = {
-          'R': 'Republican',
-          'D': 'Democratic',
-          'I': 'Independent'
-        };
+      const transformedPoliticians: Politician[] = data.members.map(
+        (member: any, index: number) => {
+          // Get party full name
+          const partyMap = {
+            R: "Republican",
+            D: "Democratic",
+            I: "Independent",
+          };
 
-        // Determine position based on terms
-        let position = "Member of Congress";
-        if (member.terms && member.terms.item) {
-          const latestTerm = Array.isArray(member.terms.item) 
-            ? member.terms.item[member.terms.item.length - 1] 
-            : member.terms.item;
-          
-          if (latestTerm.chamber === 'Senate') {
-            position = 'U.S. Senator';
-          } else if (latestTerm.chamber === 'House of Representatives') {
-            position = 'U.S. Representative';
+          // Determine position based on terms
+          let position = "Member of Congress";
+          if (member.terms && member.terms.item) {
+            const latestTerm = Array.isArray(member.terms.item)
+              ? member.terms.item[member.terms.item.length - 1]
+              : member.terms.item;
+
+            if (latestTerm.chamber === "Senate") {
+              position = "U.S. Senator";
+            } else if (latestTerm.chamber === "House of Representatives") {
+              position = "U.S. Representative";
+            }
           }
+
+          // Generate image URL from bioguideId
+          const imageUrl =
+            member.depiction?.imageUrl ||
+            `https://bioguide.congress.gov/bioguide/photo/${member.bioguideId[0]}/${member.bioguideId}.jpg`;
+
+          return {
+            id: member.bioguideId,
+            name:
+              member.name ||
+              `${member.firstName || ""} ${member.lastName || ""}`.trim(),
+            position: position,
+            image: imageUrl,
+            party: member.partyName,
+            state: member.state || "",
+            votes: Math.floor(Math.random() * 5000 + 1000).toLocaleString(),
+            trending: index < 3, // Top 3 are trending
+            rank: index + 1,
+            bio: member.officialWebsiteUrl
+              ? `Official website: ${member.officialWebsiteUrl}`
+              : "",
+          };
         }
-
-        // Generate image URL from bioguideId
-        const imageUrl = member.depiction?.imageUrl || 
-          `https://bioguide.congress.gov/bioguide/photo/${member.bioguideId[0]}/${member.bioguideId}.jpg`;
-
-        return {
-          id: member.bioguideId,
-          name: member.name || `${member.firstName || ''} ${member.lastName || ''}`.trim(),
-          position: position,
-          image: imageUrl,
-          party: member.partyName,
-          state: member.state || '',
-          votes: Math.floor(Math.random() * 5000 + 1000).toLocaleString(),
-          trending: index < 3, // Top 3 are trending
-          rank: index + 1,
-          bio: member.officialWebsiteUrl ? `Official website: ${member.officialWebsiteUrl}` : ''
-        };
-      });
+      );
 
       // Sort by votes (descending) to show true "top" politicians
       const sortedPoliticians = transformedPoliticians.sort((a, b) => {
-        const votesA = parseInt(a.votes.replace(',', ''));
-        const votesB = parseInt(b.votes.replace(',', ''));
+        const votesA = parseInt(a.votes.replace(",", ""));
+        const votesB = parseInt(b.votes.replace(",", ""));
         return votesB - votesA;
       });
 
@@ -300,12 +315,26 @@ const TopPoliticians = () => {
                   <strong>Setup Instructions:</strong>
                 </p>
                 <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
-                  <li>Sign up for a free API key at: <a href="https://api.congress.gov/sign-up/" target="_blank" className="underline">api.congress.gov/sign-up</a></li>
-                  <li>Replace YOUR_API_KEY_HERE in the code with your actual key</li>
+                  <li>
+                    Sign up for a free API key at:{" "}
+                    <a
+                      href="https://api.congress.gov/sign-up/"
+                      target="_blank"
+                      className="underline"
+                    >
+                      api.congress.gov/sign-up
+                    </a>
+                  </li>
+                  <li>
+                    Replace YOUR_API_KEY_HERE in the code with your actual key
+                  </li>
                   <li>The API allows 5,000 requests per hour</li>
                 </ol>
               </div>
-              <Button onClick={fetchTopPoliticians} className="mt-4 rounded-none">
+              <Button
+                onClick={fetchTopPoliticians}
+                className="mt-4 rounded-none"
+              >
                 Try Again
               </Button>
             </div>
@@ -323,7 +352,8 @@ const TopPoliticians = () => {
             Top Politicians
           </h2>
           <p className="text-sm md:text-base text-muted-foreground fontroboto max-w-2xl">
-            Meet the most influential political leaders from the {CURRENT_CONGRESS}th Congress
+            Meet the most influential political leaders from the{" "}
+            {CURRENT_CONGRESS}th Congress
           </p>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
