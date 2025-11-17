@@ -6,11 +6,19 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search, TrendingUp, Calendar, Eye, Loader2, AlertCircle, ExternalLink } from "lucide-react";
+import {
+  Search,
+  TrendingUp,
+  Calendar,
+  Eye,
+  Loader2,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 
 // --- GNews.io Configuration ---
 // NOTE: Ensure your key is valid for gnews.io. The key format matches GNews (32 hex characters).
-const NEWS_API_KEY = "8c084f518b8b23d615fc2925e8269cf6"; 
+const NEWS_API_KEY = "8c084f518b8b23d615fc2925e8269cf6";
 const NEWS_API_ENDPOINT = "https://gnews.io/api/v4/search";
 
 interface NewsArticle {
@@ -51,69 +59,99 @@ export default function Resources() {
         "US politics",
         "Congress legislation",
         "voting rights",
-        "presidential election"
+        "presidential election",
       ];
-      
+
       const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-      
+
       // Use GNews.io endpoint
       const response = await fetch(
-        `${NEWS_API_ENDPOINT}?q=${encodeURIComponent(randomTopic)}&language=en&country=us&max=50&apikey=${NEWS_API_KEY}`
+        `${NEWS_API_ENDPOINT}?q=${encodeURIComponent(
+          randomTopic
+        )}&language=en&country=us&max=50&apikey=${NEWS_API_KEY}`
       );
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+        throw new Error(
+          `API Error: ${response.status} - ${response.statusText}`
+        );
       }
 
       const data = await response.json();
 
+      console.log(data);
       if (data.status === "error") {
         // GNews errors include "errors" property or a message string
-        throw new Error(data.message || data.errors?.[0] || "Failed to fetch news from GNews");
+        console.log(data);
+        throw new Error(
+          data.message || data.errors?.[0] || "Failed to fetch news from GNews"
+        );
       }
 
       // GNews returns "articles" property
       if (!data.articles || data.articles.length === 0) {
-        throw new Error("No articles returned from API. The query might be too specific or the API limit reached.");
+        throw new Error(
+          "No articles returned from API. The query might be too specific or the API limit reached."
+        );
       }
 
       // Transform GNews data to our article format
-      const transformedArticles: NewsArticle[] = data.articles.map((article: any, index: number) => {
-        // Determine category based on content
-        let category: NewsArticle['category'] = "Politics";
-        const titleLower = (article.title || '').toLowerCase();
-        const descLower = (article.description || '').toLowerCase();
-        
-        if (titleLower.includes('election') || titleLower.includes('vote') || titleLower.includes('ballot')) {
-          category = "Elections";
-        } else if (titleLower.includes('bill') || titleLower.includes('legislation') || titleLower.includes('congress')) {
-          category = "Legislation";
-        } else if (titleLower.includes('policy') || descLower.includes('policy')) {
-          category = "Policy";
-        } else if (titleLower.includes('opinion') || article.source?.name?.toLowerCase().includes('opinion')) {
-          category = "Opinion";
-        }
+      const transformedArticles: NewsArticle[] = data.articles.map(
+        (article: any, index: number) => {
+          // Determine category based on content
+          let category: NewsArticle["category"] = "Politics";
+          const titleLower = (article.title || "").toLowerCase();
+          const descLower = (article.description || "").toLowerCase();
 
-        return {
-          id: article.url || `article-${index}`,
-          title: article.title || "Untitled Article",
-          // GNews.io uses 'description' for a summary
-          summary: article.description || "No description available", 
-          content: article.description || "Full content not available. Visit source link to read more.", // Use description as content fallback
-          category: category,
-          // GNews.io uses 'publishedAt'
-          date: article.publishedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
-          // GNews.io uses 'source.name' and 'source.url'
-          author: article.source?.name || "Unknown Author", 
-          views: Math.floor(Math.random() * 50000 + 5000),
-          trending: index < 8, // First 8 are trending (most recent)
-          relatedPoliticians: [],
-          // GNews.io uses 'image'
-          image: article.image || "/flag.png",
-          url: article.url,
-          source: article.source?.name
-        };
-      });
+          if (
+            titleLower.includes("election") ||
+            titleLower.includes("vote") ||
+            titleLower.includes("ballot")
+          ) {
+            category = "Elections";
+          } else if (
+            titleLower.includes("bill") ||
+            titleLower.includes("legislation") ||
+            titleLower.includes("congress")
+          ) {
+            category = "Legislation";
+          } else if (
+            titleLower.includes("policy") ||
+            descLower.includes("policy")
+          ) {
+            category = "Policy";
+          } else if (
+            titleLower.includes("opinion") ||
+            article.source?.name?.toLowerCase().includes("opinion")
+          ) {
+            category = "Opinion";
+          }
+
+          return {
+            id: article.url || `article-${index}`,
+            title: article.title || "Untitled Article",
+            // GNews.io uses 'description' for a summary
+            summary: article.description || "No description available",
+            content:
+              article.description ||
+              "Full content not available. Visit source link to read more.", // Use description as content fallback
+            category: category,
+            // GNews.io uses 'publishedAt'
+            date:
+              article.publishedAt?.split("T")[0] ||
+              new Date().toISOString().split("T")[0],
+            // GNews.io uses 'source.name' and 'source.url'
+            author: article.source?.name || "Unknown Author",
+            views: Math.floor(Math.random() * 50000 + 5000),
+            trending: index < 8, // First 8 are trending (most recent)
+            relatedPoliticians: [],
+            // GNews.io uses 'image'
+            image: article.image || "/flag.png",
+            url: article.url,
+            source: article.source?.name,
+          };
+        }
+      );
 
       setArticles(transformedArticles);
     } catch (err: any) {
@@ -124,16 +162,18 @@ export default function Resources() {
     }
   };
 
-  const filteredNews = articles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      article.summary.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredNews = articles
+    .filter((article) => {
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        article.summary.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesCategory =
-      filterCategory === "All" || article.category === filterCategory;
+      const matchesCategory =
+        filterCategory === "All" || article.category === filterCategory;
 
-    return matchesSearch && matchesCategory;
-  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      return matchesSearch && matchesCategory;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const categories = [
     "All",
@@ -193,12 +233,27 @@ export default function Resources() {
                   <strong>Setup Instructions for GNews.io:</strong>
                 </p>
                 <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
-                  <li>Sign up for a free API key at: <a href="https://gnews.io/" target="_blank" className="underline">gnews.io</a></li>
-                  <li>Replace YOUR_GNEWS_API_KEY_HERE with your actual key in the `NEWS_API_KEY` constant.</li>
+                  <li>
+                    Sign up for a free API key at:{" "}
+                    <a
+                      href="https://gnews.io/"
+                      target="_blank"
+                      className="underline"
+                    >
+                      gnews.io
+                    </a>
+                  </li>
+                  <li>
+                    Replace YOUR_GNEWS_API_KEY_HERE with your actual key in the
+                    `NEWS_API_KEY` constant.
+                  </li>
                   <li>Free tier: 100 requests/day.</li>
                 </ol>
               </div>
-              <Button onClick={fetchPoliticalNews} className="mt-4 rounded-none">
+              <Button
+                onClick={fetchPoliticalNews}
+                className="mt-4 rounded-none"
+              >
                 Try Again
               </Button>
             </div>
@@ -217,7 +272,8 @@ export default function Resources() {
             Resources
           </h2>
           <p className="text-lg text-slate-600 fontroboto dark:text-slate-400 max-w-2xl mx-auto">
-            Stay informed about politics, legislation, and elections - Live news updates
+            Stay informed about politics, legislation, and elections - Live news
+            updates
           </p>
         </div>
 
@@ -249,7 +305,11 @@ export default function Resources() {
                 className="rounded-none shadow-none fontroboto"
                 size="sm"
               >
-                {category} ({category === "All" ? articles.length : articles.filter(a => a.category === category).length})
+                {category} (
+                {category === "All"
+                  ? articles.length
+                  : articles.filter((a) => a.category === category).length}
+                )
               </Button>
             ))}
           </div>
@@ -310,7 +370,12 @@ export default function Resources() {
                       </div>
                       {featured.url && (
                         <Button asChild className="rounded-none">
-                          <a href={featured.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+                          <a
+                            href={featured.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="gap-2"
+                          >
                             Read Full Story <ExternalLink size={16} />
                           </a>
                         </Button>
@@ -391,8 +456,18 @@ export default function Resources() {
                   </div>
 
                   {article.url && (
-                    <Button asChild className="w-full rounded-none" size="sm" variant="outline">
-                      <a href={article.url} target="_blank" rel="noopener noreferrer" className="gap-2">
+                    <Button
+                      asChild
+                      className="w-full rounded-none"
+                      size="sm"
+                      variant="outline"
+                    >
+                      <a
+                        href={article.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="gap-2"
+                      >
                         Read Article <ExternalLink size={14} />
                       </a>
                     </Button>
