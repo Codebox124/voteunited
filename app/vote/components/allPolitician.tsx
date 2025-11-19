@@ -14,10 +14,37 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 
-const AllPolitician = ({ politicians = [] }) => {
-  const [ip, setIp] = useState(null);
-  const [selectedPolitician, setSelectedPolitician] = useState(null);
-  const [list, setList] = useState(politicians);
+// Type definitions
+interface Politician {
+  id: string | number;
+  name: string;
+  position: string;
+  image: string;
+  rank: number;
+  votes: number;
+  trending?: boolean;
+}
+
+interface AllPoliticianProps {
+  politicians?: Politician[];
+}
+
+interface IpResponse {
+  ip: string;
+}
+
+interface VoteResponse {
+  votes?: number;
+  message?: string;
+}
+
+type VoteType = "up" | "down";
+
+const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
+  const [ip, setIp] = useState<string | null>(null);
+  const [selectedPolitician, setSelectedPolitician] =
+    useState<Politician | null>(null);
+  const [list, setList] = useState<Politician[]>(politicians);
 
   // keep local list in sync if the prop changes
   useEffect(() => {
@@ -26,11 +53,11 @@ const AllPolitician = ({ politicians = [] }) => {
 
   // fetch IP on mount
   useEffect(() => {
-    const fetchIp = async () => {
+    const fetchIp = async (): Promise<void> => {
       try {
         const res = await fetch("https://api.ipify.org?format=json");
         if (!res.ok) throw new Error("Failed to fetch IP");
-        const data = await res.json();
+        const data: IpResponse = await res.json();
         setIp(data.ip);
       } catch (err) {
         console.error("Error fetching IP address:", err);
@@ -40,8 +67,12 @@ const AllPolitician = ({ politicians = [] }) => {
   }, []);
 
   // central vote handler
-  const handleVote = async (politician, type = "up") => {
+  const handleVote = async (
+    politician: Politician,
+    type: VoteType = "up"
+  ): Promise<void> => {
     if (!politician?.id) return;
+
     // optimistic update
     setList((prev) =>
       prev.map((p) =>
@@ -78,17 +109,10 @@ const AllPolitician = ({ politicians = [] }) => {
           `Vote request failed: ${res.status} ${res.statusText} ${text ?? ""}`
         );
       }
-      const data = await res.json();
+      const data: VoteResponse = await res.json();
       console.log("Vote response:", data);
 
       // Optionally: synchronize the server-provided vote count if returned
-      if (data?.votes !== undefined) {
-        setList((prev) =>
-          prev.map((p) =>
-            p.id === politician.id ? { ...p, votes: data.votes } : p
-          )
-        );
-      }
     } catch (error) {
       console.error("Error voting:", error);
       // revert optimistic update on error

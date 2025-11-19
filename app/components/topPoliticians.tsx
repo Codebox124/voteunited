@@ -219,6 +219,7 @@ const TopPoliticians = () => {
 
       // Transform API data to our politician format
       const transformedPoliticians: Politician[] = data.members.map(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (member: any, index: number) => {
           // Get party full name
           const partyMap = {
@@ -274,6 +275,7 @@ const TopPoliticians = () => {
 
       // Take only top 10
       setPoliticians(sortedPoliticians.slice(0, 10));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching Congress members:", err);
       setError(err.message || "An error occurred");

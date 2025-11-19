@@ -19,7 +19,22 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const Featured = ({ politicians }) => {
+// Type definitions
+interface Politician {
+  id: string | number;
+  name: string;
+  position: string;
+  image: string;
+  rank: number;
+  votes: number;
+  trending?: boolean;
+}
+
+interface FeaturedProps {
+  politicians: Politician[];
+}
+
+const Featured = ({ politicians }: FeaturedProps) => {
   return (
     <div className="bg-background">
       <div className="max-w-7xl mx-auto px-4 pt-16 sm:px-6 lg:px-8">
@@ -93,12 +108,14 @@ const Featured = ({ politicians }) => {
                               </div>
                               <div className="flex gap-2 items-center">
                                 <Button
+                                  aria-label={`Upvote ${politician.name}`}
                                   className="text-primary hover:bg-primary/90 border border-primary bg-transparent rounded-none"
                                   variant="outline"
                                 >
                                   <ThumbsUp className="w-10 h-10" />
                                 </Button>
                                 <Button
+                                  aria-label={`Downvote ${politician.name}`}
                                   className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
                                   variant="outline"
                                 >
@@ -179,4 +196,5 @@ const Featured = ({ politicians }) => {
     </div>
   );
 };
+
 export default Featured;

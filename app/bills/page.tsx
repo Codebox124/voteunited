@@ -112,6 +112,7 @@ export default function CongressionalBills() {
       );
 
       setBills(transformedBills);
+      console.log(transformedBills);
     } catch (err: any) {
       console.error("Error fetching bills:", err);
       setError(err.message || "An error occurred");
@@ -336,7 +337,7 @@ export default function CongressionalBills() {
 
                     <Button asChild className="rounded-none">
                       <a
-                        href={featured.url}
+                        href={`http://localhost:3000/bill?congress=${featured.congress}&billType=${featured.type}&billNumber=${featured.number}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="gap-2"
@@ -422,7 +423,7 @@ export default function CongressionalBills() {
                     variant="outline"
                   >
                     <a
-                      href={bill.url}
+                      href={`http://localhost:3000/bill?congress=${bill.congress}&billType=${bill.type}&billNumber=${bill.number}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="gap-2"

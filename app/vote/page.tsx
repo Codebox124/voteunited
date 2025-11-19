@@ -15,7 +15,18 @@ import { Button } from "@/components/ui/button";
 //   trending: boolean;
 //   position: string;
 // }
-const normalizePolitician = (raw, index) => ({
+const normalizePolitician = (
+  raw: {
+    id: string;
+    name: string;
+    image_url: string;
+    votes: string;
+    party: string;
+    district: string;
+    state: string;
+  },
+  index: number
+) => ({
   id: raw.id,
   name: raw.name,
   image: raw.image_url ?? "https://placehold.co/600x400?text=No+Image",
@@ -56,7 +67,6 @@ const Page = () => {
       setPoliticians(processedData);
     } catch (err) {
       console.error("Error fetching Congress members:", err);
-      setError(err.message);
     } finally {
       setLoading(false);
     }
