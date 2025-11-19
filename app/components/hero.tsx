@@ -20,7 +20,7 @@ const Hero = () => {
 
       <div className="relative z-10 max-w-4xl space-y-6 text-center md:text-left mx-auto md:mx-0">
         <h1 className="text-4xl font-bold text-white tracking-tight  fontmont sm:text-5xl lg:text-6xl">
-          Empowering<span className="text-primary"> Every Citizen</span>. <br />
+          Empowering<span className="text-primary"> Every Citizen</span> <br />
           to Make Their Vote <span className="text-secondary">Count.</span>
         </h1>
 

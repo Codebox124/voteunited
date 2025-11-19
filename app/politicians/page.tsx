@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { TrendingUp, Vote, Loader2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -13,7 +14,6 @@ import {
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const CONGRESS_API_KEY = "g4g9hInpzEbA7vb3j0rqCpNb40YcfUj2zRKed27i";
 const CURRENT_CONGRESS = "119";
 
 interface Politician {
@@ -189,9 +189,7 @@ const Politicians = () => {
       setError(null);
 
       // Fetch members from Congress.gov API
-      const response = await fetch(
-        `https://api.congress.gov/v3/member?api_key=${CONGRESS_API_KEY}&currentMember=true&limit=250&format=json`
-      );
+      const response = await fetch(`https://voteunited.buyjet.ng/api/members`);
 
       if (!response.ok) {
         throw new Error(

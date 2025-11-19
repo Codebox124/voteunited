@@ -1,3 +1,4 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,37 +12,101 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useEffect, useState } from "react";
 
-const AllPolitician = () => {
-  const politicians = [
-    {
-      id: 1,
-      name: "John Doe",
-      position: "House of Representatives",
-      image: "/flag.png",
-      votes: "2,000",
-      trending: true,
-      rank: 1,
-    },
-    {
-      id: 2,
-      name: "Jane Smith",
-      position: "Senate",
-      image: "/flag.png",
-      votes: "1,850",
-      trending: false,
-      rank: 2,
-    },
-    {
-      id: 3,
-      name: "Robert Johnson",
-      position: "Governor",
-      image: "/flag.png",
-      votes: "1,720",
-      trending: true,
-      rank: 3,
-    },
-  ];
+const AllPolitician = ({ politicians = [] }) => {
+  const [ip, setIp] = useState(null);
+  const [selectedPolitician, setSelectedPolitician] = useState(null);
+  const [list, setList] = useState(politicians);
+
+  // keep local list in sync if the prop changes
+  useEffect(() => {
+    setList(politicians);
+  }, [politicians]);
+
+  // fetch IP on mount
+  useEffect(() => {
+    const fetchIp = async () => {
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        if (!res.ok) throw new Error("Failed to fetch IP");
+        const data = await res.json();
+        setIp(data.ip);
+      } catch (err) {
+        console.error("Error fetching IP address:", err);
+      }
+    };
+    fetchIp();
+  }, []);
+
+  // central vote handler
+  const handleVote = async (politician, type = "up") => {
+    if (!politician?.id) return;
+    // optimistic update
+    setList((prev) =>
+      prev.map((p) =>
+        p.id === politician.id
+          ? {
+              ...p,
+              votes:
+                type === "up"
+                  ? (Number(p.votes) || 0) + 1
+                  : Math.max((Number(p.votes) || 0) - 1, 0),
+            }
+          : p
+      )
+    );
+
+    try {
+      const endpoint =
+        type === "up"
+          ? "https://cors-anywhere.herokuapp.com/https://voteunited.buyjet.ng/api/upvote-member"
+          : "https://voteunited.buyjet.ng/api/downvote-member";
+
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ip,
+          memberId: politician.id,
+        }),
+      });
+
+      if (!res.ok) {
+        const text = await res.text().catch(() => null);
+        throw new Error(
+          `Vote request failed: ${res.status} ${res.statusText} ${text ?? ""}`
+        );
+      }
+      const data = await res.json();
+      console.log("Vote response:", data);
+
+      // Optionally: synchronize the server-provided vote count if returned
+      if (data?.votes !== undefined) {
+        setList((prev) =>
+          prev.map((p) =>
+            p.id === politician.id ? { ...p, votes: data.votes } : p
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error voting:", error);
+      // revert optimistic update on error
+      setList((prev) =>
+        prev.map((p) =>
+          p.id === politician.id
+            ? {
+                ...p,
+                votes:
+                  type === "up"
+                    ? Math.max((Number(p.votes) || 0) - 1, 0)
+                    : (Number(p.votes) || 0) + 1,
+              }
+            : p
+        )
+      );
+    }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
@@ -57,7 +122,7 @@ const AllPolitician = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {politicians.map((politician) => (
+        {list.map((politician) => (
           <Card
             key={politician.id}
             className="relative overflow-hidden rounded-none h-[280px] border-border hover:shadow-lg transition-shadow duration-300 hover:border-primary/30"
@@ -99,12 +164,16 @@ const AllPolitician = () => {
                     </div>
                     <div className="flex gap-2 items-center">
                       <Button
+                        aria-label={`Upvote ${politician.name}`}
+                        onClick={() => handleVote(politician, "up")}
                         className="text-primary hover:bg-primary/90 border border-primary bg-transparent rounded-none"
                         variant="outline"
                       >
                         <ThumbsUp className="w-6 h-6" />
                       </Button>
                       <Button
+                        aria-label={`Downvote ${politician.name}`}
+                        onClick={() => handleVote(politician, "down")}
                         className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
                         variant="outline"
                       >
@@ -116,24 +185,27 @@ const AllPolitician = () => {
 
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none w-full">
+                    <Button
+                      onClick={() => setSelectedPolitician(politician)}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-none w-full"
+                    >
                       View Profile
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-xl">
+                  <DialogContent className="sm:max-w-xl rounded-none">
                     <DialogHeader>
                       <DialogTitle className="fontmont">
-                        {politician.name}
+                        {selectedPolitician?.name ?? politician.name}
                       </DialogTitle>
                       <DialogDescription className="fontroboto">
-                        {politician.position}
+                        {selectedPolitician?.position ?? politician.position}
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="rounded-md border border-border overflow-hidden">
                         <img
-                          src={politician.image}
-                          alt={politician.name}
+                          src={selectedPolitician?.image ?? politician.image}
+                          alt={selectedPolitician?.name ?? politician.name}
                           className="w-full h-40 object-cover"
                         />
                       </div>
@@ -142,15 +214,16 @@ const AllPolitician = () => {
                           Rank
                         </div>
                         <div className="text-lg font-semibold text-foreground">
-                          #{politician.rank}
+                          #{selectedPolitician?.rank ?? politician.rank}
                         </div>
                         <div className="text-sm text-muted-foreground fontroboto">
                           Votes
                         </div>
                         <div className="text-lg font-semibold text-primary fontmont">
-                          {politician.votes}
+                          {selectedPolitician?.votes ?? politician.votes}
                         </div>
-                        {politician.trending && (
+                        {(selectedPolitician?.trending ??
+                          politician.trending) && (
                           <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
                             <TrendingUp size={14} /> Trending
                           </div>
@@ -158,10 +231,28 @@ const AllPolitician = () => {
                       </div>
                     </div>
                     <DialogFooter>
-                      <Button className="rounded-none">Vote Now</Button>
-                      <Button variant="outline" className="rounded-none">
-                        View Full Profile
-                      </Button>
+                      <div className="flex gap-2 items-center">
+                        <Button
+                          aria-label={`Upvote ${politician.name} from modal`}
+                          onClick={() =>
+                            handleVote(selectedPolitician ?? politician, "up")
+                          }
+                          className="text-primary hover:bg-primary/90 border border-primary bg-transparent rounded-none"
+                          variant="outline"
+                        >
+                          <ThumbsUp className="w-6 h-6" />
+                        </Button>
+                        <Button
+                          aria-label={`Downvote ${politician.name} from modal`}
+                          onClick={() =>
+                            handleVote(selectedPolitician ?? politician, "down")
+                          }
+                          className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
+                          variant="outline"
+                        >
+                          <ThumbsDown className="w-6 h-6" />
+                        </Button>
+                      </div>
                     </DialogFooter>
                   </DialogContent>
                 </Dialog>

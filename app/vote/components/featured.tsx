@@ -19,37 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const politicians = [
-  {
-    id: 1,
-    name: "John Doe",
-    position: "House of Representatives",
-    image: "/flag.png",
-    votes: "2,000",
-    trending: true,
-    rank: 1,
-  },
-  {
-    id: 2,
-    name: "Jane Smith",
-    position: "Senate",
-    image: "/flag.png",
-    votes: "1,850",
-    trending: false,
-    rank: 2,
-  },
-  {
-    id: 3,
-    name: "Robert Johnson",
-    position: "Governor",
-    image: "/flag.png",
-    votes: "1,720",
-    trending: true,
-    rank: 3,
-  },
-];
-
-const Featured = () => {
+const Featured = ({ politicians }) => {
   return (
     <div className="bg-background">
       <div className="max-w-7xl mx-auto px-4 pt-16 sm:px-6 lg:px-8">
@@ -82,7 +52,7 @@ const Featured = () => {
                   className="md:basis-1/2 lg:basis-1/3 pl-2"
                 >
                   <div className="p-1">
-                    <Card className="relative rounded-none overflow-hidden h-[280px] border-border hover:shadow-lg transition-shadow duration-300 hover:border-primary/30 ">
+                    <Card className="relative rounded-none overflow-hidden h-[280px] border-border hover:shadow-lg transition-shadow duration-300 hover:border-primary/30">
                       <CardContent className="p-0 h-full">
                         <div
                           className="absolute inset-0 bg-cover bg-center"
@@ -91,9 +61,8 @@ const Featured = () => {
                           }}
                         />
                         <div className="absolute inset-0 bg-black/20 backdrop-blur-[1px]" />
-
                         <div className="relative h-full flex flex-col justify-between px-4">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between pt-3">
                             <Badge className="rounded-full px-3 py-1 text-xs bg-red-600 text-white">
                               #{politician.rank}
                             </Badge>
@@ -122,21 +91,18 @@ const Featured = () => {
                                   </span>
                                 </p>
                               </div>
-                              <div className=" flex gap-2 items-center">
+                              <div className="flex gap-2 items-center">
                                 <Button
-                                  className=" text-primary hover:bg-primary/90 border border-primary bg-transparent rounded-none"
-                                  variant={"outline"}
+                                  className="text-primary hover:bg-primary/90 border border-primary bg-transparent rounded-none"
+                                  variant="outline"
                                 >
-                                  <ThumbsUp className="w-10 h-10 " />
+                                  <ThumbsUp className="w-10 h-10" />
                                 </Button>
                                 <Button
-                                  className=" text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
-                                  variant={"outline"}
+                                  className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
+                                  variant="outline"
                                 >
-                                  <ThumbsDown
-                                    className="w-10 h-10 "
-                                    size={10}
-                                  />
+                                  <ThumbsDown className="w-10 h-10" />
                                 </Button>
                               </div>
                             </div>
@@ -213,5 +179,4 @@ const Featured = () => {
     </div>
   );
 };
-
 export default Featured;
