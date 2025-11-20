@@ -7,9 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-// Using FREE GNews API - sign up at https://gnews.io/
-const GNEWS_API_KEY = "8c084f518b8b23d615fc2925e8269cf6"; // Replace with your key
-const GNEWS_ENDPOINT = "https://gnews.io/api/v4/search";
+const CONGRESS_API_KEY = "kycYtq68dOZ6tjLnAf5GaVk4ayQ1QUGmG76aA3rc";
+const CONGRESS_API_URL = "https://api.congress.gov/v3/bill";
 
 type CategoryType =
   | "Politics"
@@ -61,73 +60,69 @@ const FeaturedResources: React.FC = () => {
     fetchFeaturedNews();
   }, []);
 
-  const fetchFeaturedNews = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+const fetchFeaturedNews = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-      // Fetch featured US political news from GNews (100% FREE, works in browser)
-      const query = "US election 2024 OR politics";
-      const response = await fetch(
-        `${GNEWS_ENDPOINT}?q=${encodeURIComponent(query)}&lang=en&country=us&max=6&apikey=${GNEWS_API_KEY}`
-      );
+    const response = await fetch(
+      `${CONGRESS_API_URL}?api_key=${CONGRESS_API_KEY}&format=json&limit=40&sort=dateOfIntroduction`
+    );
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status} - ${response.statusText}`);
-      }
+    if (!response.ok) {
+      throw new Error(`Congress API Error: ${response.status}`);
+    }
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (data.errors) {
-        throw new Error(data.errors[0] || "Failed to fetch news");
-      }
+    if (!data.bills || data.bills.length === 0) {
+      throw new Error("No legislative news found from Congress API.");
+    }
 
-      if (!data.articles || data.articles.length === 0) {
-        throw new Error("No articles returned from API");
-      }
+    const transformed: NewsArticle[] = data.bills.map(
+      (bill: any, index: number) => {
+        const latestAction = bill.latestAction?.text || "No update available";
 
-      // Transform GNews data to our article format
-      const transformedArticles: NewsArticle[] = data.articles.slice(0, 6).map((article: any, index: number) => {
-        // Determine category based on content
-        let category: CategoryType = "Politics";
-        const titleLower = (article.title || '').toLowerCase();
-        const descLower = (article.description || '').toLowerCase();
-        
-        if (titleLower.includes('election') || titleLower.includes('vote') || titleLower.includes('ballot')) {
-          category = "Elections";
-        } else if (titleLower.includes('bill') || titleLower.includes('legislation') || titleLower.includes('congress')) {
+        let category: NewsArticle["category"] = "Politics";
+        const actionLower = latestAction.toLowerCase();
+
+        if (bill.type === "hr" || bill.type === "s") {
           category = "Legislation";
-        } else if (titleLower.includes('policy') || descLower.includes('policy')) {
-          category = "Policy";
-        } else if (titleLower.includes('opinion') || article.source?.name?.toLowerCase().includes('opinion')) {
-          category = "Opinion";
         }
+        if (actionLower.includes("election")) category = "Elections";
+        if (actionLower.includes("policy")) category = "Policy";
 
         return {
-          id: article.url || `article-${index}`,
-          title: article.title || "Untitled Article",
-          summary: article.description || article.content?.substring(0, 200) + "..." || "No description available",
-          content: article.content || article.description || "Full content not available.",
-          category: category,
-          date: article.publishedAt?.split('T')[0] || new Date().toISOString().split('T')[0],
-          author: article.source?.name || "Unknown Source",
-          views: Math.floor(Math.random() * 50000 + 5000),
-          trending: index < 3, // First 3 are trending
+          id: bill.billNumber || `bill-${index}`,
+          title: bill.title || latestAction || "Congressional Update",
+          summary: latestAction,
+          content: latestAction,
+          category,
+          date:
+            bill.latestAction?.actionDate ||
+            bill.dateOfIntroduction ||
+            new Date().toISOString().split("T")[0],
+          author: bill.sponsor?.fullName || "United States Congress",
+          views: Math.round(Math.random() * 50000),
+          trending: index < 8,
           relatedPoliticians: [],
-          image: article.image || "/flag.png",
-          url: article.url,
-          source: article.source?.name
+          image: "/flag.png",
+          url: bill.congressUrl || "https://www.congress.gov",
+          source: "Congress.gov",
         };
-      });
+      }
+    );
 
-      setArticles(transformedArticles);
-    } catch (err: any) {
-      console.error("Error fetching featured news:", err);
-      setError(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
-    }
-  };
+    // ✅ Return only 6 posts
+    setArticles(transformed.slice(0, 6));
+
+  } catch (err: any) {
+    setError(err.message || "Failed to load Congress data.");
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading) {
     return (

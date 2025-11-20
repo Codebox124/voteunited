@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
 import { upvoteMember } from "@/lib/api";
+import toast from "react-hot-toast";
 
 // Type definitions
 interface Politician {
@@ -69,25 +70,30 @@ const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
     fetchIp();
   }, []);
 
-  // central vote handler
-  const handleUpvote = async (id: string | number) => {
-    try {
-      setLoadingId(id);
+const handleUpvote = async (id: string | number) => {
+  try {
+    setLoadingId(id);
 
-      const res = await upvoteMember(id);
+    const res = await upvoteMember(id);
 
-      // Assuming API returns success
+    if (res?.success) {
       setItems((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, votes: item.votes + 1 } : item
         )
       );
-    } catch (err) {
-      console.error("Vote failed:", err);
-    } finally {
-      setLoadingId(null);
+
+      toast.success("Vote successful! 🎉");
+    } else {
+      toast.error(res?.message || "You already voted ❌");
     }
-  };
+  } catch (err) {
+    console.error(err);
+    toast.error("Something went wrong ❌");
+  } finally {
+    setLoadingId(null);
+  }
+};
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { useState } from "react";
 import { upvoteMember } from "@/lib/api";
+import toast from "react-hot-toast";
 
 // Type definitions
 interface Politician {
@@ -46,14 +47,20 @@ const Featured = ({ politicians }: FeaturedProps) => {
 
       const res = await upvoteMember(id);
 
-      // Assuming API returns success
-      setItems((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, votes: item.votes + 1 } : item
-        )
-      );
+      if (res?.success) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, votes: item.votes + 1 } : item
+          )
+        );
+
+        toast.success("Vote successful! 🎉");
+      } else {
+        toast.error(res?.message || "You already voted ❌");
+      }
     } catch (err) {
-      console.error("Vote failed:", err);
+      console.error(err);
+      toast.error("Something went wrong ❌");
     } finally {
       setLoadingId(null);
     }
