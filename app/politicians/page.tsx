@@ -183,82 +183,63 @@ const Politicians = () => {
     fetchCongressMembers();
   }, []);
 
-  const fetchCongressMembers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+const fetchCongressMembers = async () => {
+  try {
+    setLoading(true);
+    setError(null);
 
-      // Fetch members from Congress.gov API
-      const response = await fetch(`https://voteunited.buyjet.ng/api/members`);
+    const response = await fetch("https://voteunited.buyjet.ng/api/members");
 
-      if (!response.ok) {
-        throw new Error(
-          `API Error: ${response.status} - ${response.statusText}`
-        );
-      }
-
-      const data = await response.json();
-
-      if (!data.members || data.members.length === 0) {
-        throw new Error("No members data returned from API");
-      }
-
-      // Transform API data to our politician format
-      const transformedPoliticians: Politician[] = data.members.map(
-        (member: any, index: number) => {
-          // Get party full name
-          const partyMap: Record<string, string> = {
-            R: "Republican",
-            D: "Democratic",
-            I: "Independent",
-          };
-
-          // Determine position based on terms
-          let position = "Member of Congress";
-          if (member.terms && member.terms.item) {
-            const latestTerm = Array.isArray(member.terms.item)
-              ? member.terms.item[member.terms.item.length - 1]
-              : member.terms.item;
-
-            if (latestTerm.chamber === "Senate") {
-              position = "U.S. Senator";
-            } else if (latestTerm.chamber === "House of Representatives") {
-              position = "U.S. Representative";
-            }
-          }
-
-          // Generate image URL from bioguideId
-          const imageUrl =
-            member.depiction?.imageUrl ||
-            `https://bioguide.congress.gov/bioguide/photo/${member.bioguideId[0]}/${member.bioguideId}.jpg`;
-
-          return {
-            id: member.bioguideId,
-            name:
-              member.name ||
-              `${member.firstName || ""} ${member.lastName || ""}`.trim(),
-            position: position,
-            image: imageUrl,
-            party: partyMap[member.partyName] || member.partyName,
-            state: member.state || "",
-            votes: Math.floor(Math.random() * 5000).toLocaleString(),
-            trending: Math.random() > 0.7,
-            rank: index + 1,
-            bio: member.officialWebsiteUrl
-              ? `Official website: ${member.officialWebsiteUrl}`
-              : "",
-          };
-        }
-      );
-
-      setPoliticians(transformedPoliticians);
-    } catch (err: any) {
-      console.error("Error fetching Congress members:", err);
-      setError(err.message || "An error occurred");
-    } finally {
-      setLoading(false);
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
     }
-  };
+
+    const data = await response.json();
+    console.log("API RESPONSE:", data);
+
+    // 🛠 FIX: Correct members array location
+    const members = data?.members?.data || [];
+
+    if (!Array.isArray(members)) {
+      throw new Error("Members data is not an array");
+    }
+
+    const transformedPoliticians: Politician[] = members.map(
+      (member: any, index: number) => {
+        const latestTerm = member.terms?.[0];
+
+        let position = "Member of Congress";
+        if (latestTerm?.chamber === "Senate") {
+          position = "U.S. Senator";
+        } else if (latestTerm?.chamber === "House of Representatives") {
+          position = "U.S. Representative";
+        }
+
+        return {
+          id: member.external_id,
+          name: member.name,
+          position,
+          image: member.image_url,
+          party: member.party,
+          state: member.state,
+          votes: member.votes_count?.toLocaleString() || "0",
+          trending: Math.random() > 0.7,
+          rank: index + 1,
+          bio: member.source_url ? `Source: ${member.source_url}` : "",
+        };
+      }
+    );
+
+    setPoliticians(transformedPoliticians);
+  } catch (err: any) {
+    console.error(err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const filteredPoliticians = politicians.filter((p: Politician) => {
     if (filter === "all") return true;
