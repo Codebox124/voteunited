@@ -51,7 +51,7 @@ const PoliticianCard = ({
           <img
             src={politician.image}
             alt={politician.name}
-            className="w-full h-full object-fill"
+            className="w-full h-full object-contain"
             onError={(e) => {
               e.currentTarget.src = "/flag.png";
             }}
