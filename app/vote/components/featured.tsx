@@ -18,6 +18,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useState } from "react";
+import { upvoteMember } from "@/lib/api";
 
 // Type definitions
 interface Politician {
@@ -35,6 +37,27 @@ interface FeaturedProps {
 }
 
 const Featured = ({ politicians }: FeaturedProps) => {
+  const [items, setItems] = useState(politicians);
+  const [loadingId, setLoadingId] = useState<string | number | null>(null);
+
+  const handleUpvote = async (id: string | number) => {
+    try {
+      setLoadingId(id);
+
+      const res = await upvoteMember(id);
+
+      // Assuming API returns success
+      setItems((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, votes: item.votes + 1 } : item
+        )
+      );
+    } catch (err) {
+      console.error("Vote failed:", err);
+    } finally {
+      setLoadingId(null);
+    }
+  };
   return (
     <div className="bg-background">
       <div className="max-w-7xl mx-auto px-4 pt-16 sm:px-6 lg:px-8">
