@@ -2,7 +2,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -62,6 +61,7 @@ export default function Resources() {
       }
 
       const data = await response.json();
+      console.log(data);
 
       if (!data.bills || data.bills.length === 0) {
         throw new Error("No legislative news found from Congress API.");
@@ -102,6 +102,7 @@ export default function Resources() {
       );
 
       setArticles(transformed);
+      console.log(transformed);
     } catch (err: any) {
       setError(err.message || "Failed to load Congress data.");
     } finally {
@@ -248,7 +249,9 @@ export default function Resources() {
                     </div>
                     <div className="p-6">
                       <div className="flex gap-2 mb-2">
-                        <Badge className={`${getCategoryColor(featured.category)}`}>
+                        <Badge
+                          className={`${getCategoryColor(featured.category)}`}
+                        >
                           {featured.category}
                         </Badge>
                         <Badge className="bg-red-100 text-red-700 gap-1">
@@ -303,7 +306,9 @@ export default function Resources() {
 
               <div className="p-4 flex flex-col flex-1">
                 <div className="flex gap-2 mb-2">
-                  <Badge className={`${getCategoryColor(article.category)} text-xs`}>
+                  <Badge
+                    className={`${getCategoryColor(article.category)} text-xs`}
+                  >
                     {article.category}
                   </Badge>
                   {article.trending && (
@@ -313,9 +318,7 @@ export default function Resources() {
                   )}
                 </div>
 
-                <h3 className="font-bold mb-2 line-clamp-2">
-                  {article.title}
-                </h3>
+                <h3 className="font-bold mb-2 line-clamp-2">{article.title}</h3>
 
                 <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
                   {article.summary}

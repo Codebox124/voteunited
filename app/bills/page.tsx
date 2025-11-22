@@ -338,7 +338,6 @@ export default function CongressionalBills() {
                     <Button asChild className="rounded-none">
                       <a
                         href={`https://voteunited.vercel.app/bill?congress=${featured.congress}&billType=${featured.type}&billNumber=${featured.number}`}
-                        target="_blank"
                         rel="noopener noreferrer"
                         className="gap-2"
                       >
