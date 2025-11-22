@@ -30,6 +30,11 @@ export default function Footer() {
             </h4>
             <ul className="space-y-2 text-sm">
               <li>
+                <Link href="/about" className="hover:text-primary">
+                  About
+                </Link>
+              </li>
+              <li>
                 <Link href="/politicians" className="hover:text-primary">
                   Politicians
                 </Link>
@@ -58,16 +63,6 @@ export default function Footer() {
               Company
             </h4>
             <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/about" className="hover:text-primary">
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link href="/contact" className="hover:text-primary">
-                  Contact
-                </Link>
-              </li>
               <li>
                 <Link href="/privacy" className="hover:text-primary">
                   Privacy Policy
