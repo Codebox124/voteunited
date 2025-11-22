@@ -22,7 +22,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden gap-1 md:flex ">
+          <nav className="hidden gap-1  lg:flex ">
             <Button variant="ghost" asChild className="text-base">
               <Link href="/about">About</Link>
             </Button>
@@ -47,13 +47,13 @@ export default function Navbar() {
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
-              className="hidden sm:inline-flex gap-2 text-base bg-transparent shadow-none rounded-none border-primary"
+              className="hidden lg:inline-flex gap-2 text-base bg-transparent shadow-none rounded-none border-primary"
               asChild
             >
               <Link href="/login">Sign In</Link>
             </Button>
             <Button
-              className="hidden sm:inline-flex gap-2 text-base shadow-none rounded-none"
+              className="hidden lg:inline-flex gap-2 text-base shadow-none rounded-none"
               asChild
             >
               <Link href="/signup">Create Account</Link>
@@ -61,7 +61,7 @@ export default function Navbar() {
 
             {/* Mobile Menu Button */}
             <button
-              className="md:hidden p-2"
+              className="lg:hidden p-2"
               onClick={() => setIsOpen(!isOpen)}
               aria-label="Toggle menu"
             >
@@ -72,7 +72,7 @@ export default function Navbar() {
 
         {/* Mobile Navigation */}
         {isOpen && (
-          <nav className="border-t border-border py-4 md:hidden space-y-2">
+          <nav className="border-t border-border py-4 lg:hidden space-y-2">
             <Button variant="ghost" className="w-full justify-start" asChild>
               <Link href="/about">About</Link>
             </Button>
