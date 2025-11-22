@@ -3,74 +3,34 @@ import { NextRequest, NextResponse } from "next/server";
 // Google Civic Information API endpoint
 const CIVIC_API_URL = "https://www.googleapis.com/civicinfo/v2/voterinfo";
 
-// You can set your API key here or use environment variable
-const API_KEY = process.env.GOOGLE_CIVIC_API_KEY || "YOUR_API_KEY_HERE";
-
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
-    const zipCode = searchParams.get("zipCode");
+    const address = searchParams.get("address") || searchParams.get("zipCode");
 
-    if (!zipCode) {
+    if (!address) {
       return NextResponse.json(
-        { error: "ZIP code is required" },
+        { error: "Address or ZIP code is required" },
         { status: 400 }
       );
     }
 
-    // Validate ZIP code format
-    if (!/^\d{5}$/.test(zipCode)) {
-      return NextResponse.json(
-        { error: "Invalid ZIP code format. Please enter a 5-digit ZIP code." },
-        { status: 400 }
-      );
-    }
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_CIVIC_API_KEY;
 
-    // Check if API key is configured
-    if (API_KEY === "YOUR_API_KEY_HERE") {
-      // Return mock data for demonstration purposes
-      return NextResponse.json({
-        kind: "civicinfo#voterInfoResponse",
-        election: {
-          id: "2000",
-          name: "VIP Test Election",
-          electionDay: "2025-11-04",
+    if (!apiKey) {
+      return NextResponse.json(
+        {
+          error:
+            "Google Civic API key is not configured. Please add NEXT_PUBLIC_GOOGLE_CIVIC_API_KEY to your .env.local file",
         },
-        pollingLocations: [
-          {
-            address: {
-              locationName: "Sample Polling Location",
-              line1: "123 Main Street",
-              city: "Sample City",
-              state: "CA",
-              zip: zipCode,
-            },
-            pollingHours: "7:00 AM - 8:00 PM",
-            notes:
-              "This is sample data. Please configure your Google Civic Information API key to get real polling location data.",
-          },
-        ],
-        earlyVoteSites: [
-          {
-            address: {
-              locationName: "Early Voting Center",
-              line1: "456 Oak Avenue",
-              city: "Sample City",
-              state: "CA",
-              zip: zipCode,
-            },
-            pollingHours: "Monday-Friday: 9:00 AM - 5:00 PM",
-          },
-        ],
-        electionName: "VIP Test Election",
-        electionDay: "2025-11-04",
-      });
+        { status: 500 }
+      );
     }
 
-    // Make request to Google Civic Information API
-    const apiUrl = `${CIVIC_API_URL}?key=${API_KEY}&address=${encodeURIComponent(
-      zipCode
-    )}`;
+    // Make request to Google Civic Information API with all available data
+    const apiUrl = `${CIVIC_API_URL}?key=${apiKey}&address=${encodeURIComponent(
+      address
+    )}&electionId=2000&officialOnly=false`;
 
     const response = await fetch(apiUrl);
     const data = await response.json();
@@ -101,16 +61,34 @@ export async function GET(request: NextRequest) {
       throw new Error(data.error?.message || "Failed to fetch polling data");
     }
 
-    // Transform the response to match our interface
+    // Transform the response to include all relevant information
     const transformedData = {
+      // Election Information
+      election: data.election || null,
+
+      // Polling Locations (Election Day)
       pollingLocations: data.pollingLocations || [],
+
+      // Early Vote Sites
       earlyVoteSites: data.earlyVoteSites || [],
-      electionName: data.election?.name,
-      electionDay: data.election?.electionDay,
+
+      // Drop-off Locations
+      dropOffLocations: data.dropOffLocations || [],
+
+      // Contests (Races/Ballot Items)
+      contests: data.contests || [],
+
+      // State Information
+      state: data.state || [],
+
+      // Election Officials
+      electionOfficials: extractElectionOfficials(data.state),
+
+      // Normalized Input Address
+      normalizedInput: data.normalizedInput || null,
     };
 
     return NextResponse.json(transformedData);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Polling location API error:", error);
     return NextResponse.json(
@@ -122,4 +100,54 @@ export async function GET(request: NextRequest) {
       { status: 500 }
     );
   }
+}
+
+// Helper function to extract election officials from state data
+function extractElectionOfficials(stateData: any[]) {
+  if (!stateData || !Array.isArray(stateData)) {
+    return [];
+  }
+
+  const officials: any[] = [];
+
+  stateData.forEach((state) => {
+    // Local jurisdiction officials
+    if (state.local_jurisdiction?.electionAdministrationBody) {
+      const admin = state.local_jurisdiction.electionAdministrationBody;
+      officials.push({
+        type: "Local Election Official",
+        name: state.local_jurisdiction.name,
+        ...extractAdminInfo(admin),
+      });
+    }
+
+    // State-level officials
+    if (state.electionAdministrationBody) {
+      officials.push({
+        type: "State Election Official",
+        name: state.name,
+        ...extractAdminInfo(state.electionAdministrationBody),
+      });
+    }
+  });
+
+  return officials;
+}
+
+// Helper function to extract administration information
+function extractAdminInfo(admin: any) {
+  return {
+    electionInfoUrl: admin.electionInfoUrl,
+    electionRegistrationUrl: admin.electionRegistrationUrl,
+    electionRegistrationConfirmationUrl:
+      admin.electionRegistrationConfirmationUrl,
+    absenteeVotingInfoUrl: admin.absenteeVotingInfoUrl,
+    votingLocationFinderUrl: admin.votingLocationFinderUrl,
+    ballotInfoUrl: admin.ballotInfoUrl,
+    correspondenceAddress: admin.correspondenceAddress,
+    physicalAddress: admin.physicalAddress,
+    electionOfficials: admin.electionOfficials || [],
+    voter_services: admin.voter_services || [],
+    hoursOfOperation: admin.hoursOfOperation,
+  };
 }
