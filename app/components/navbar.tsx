@@ -24,9 +24,6 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <nav className="hidden gap-1  lg:flex ">
             <Button variant="ghost" asChild className="text-base">
-              <Link href="/about">About</Link>
-            </Button>
-            <Button variant="ghost" asChild className="text-base">
               <Link href="/politicians">Politicians</Link>
             </Button>
             <Button variant="ghost" asChild className="text-base ">
@@ -70,9 +67,6 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isOpen && (
           <nav className="border-t border-border py-4 lg:hidden space-y-2">
-            <Button variant="ghost" className="w-full justify-start" asChild>
-              <Link href="/about">About</Link>
-            </Button>
             <Button variant="ghost" className="w-full justify-start" asChild>
               <Link href="/politicians">Politicians</Link>
             </Button>
