@@ -211,7 +211,7 @@ const StateSelector = () => {
                 <SelectTrigger className="w-full rounded-none h-12 text-base fontroboto border-2 hover:border-primary transition-colors">
                   <SelectValue placeholder="Select a state..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-none max-h-[300px] h-12">
+                <SelectContent className="rounded-none max-h-[300px]">
                   {US_STATES.map((state) => (
                     <SelectItem
                       key={state.abbr}
