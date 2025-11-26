@@ -211,7 +211,7 @@ const StateSelector = () => {
                 <SelectTrigger className="w-full rounded-none h-12 text-base fontroboto border-2 hover:border-primary transition-colors">
                   <SelectValue placeholder="Select a state..." />
                 </SelectTrigger>
-                <SelectContent className="rounded-none max-h-[300px] h-12">
+                <SelectContent className="rounded-none max-h-[300px]">
                   {US_STATES.map((state) => (
                     <SelectItem
                       key={state.abbr}
@@ -233,7 +233,7 @@ const StateSelector = () => {
               <Button
                 onClick={handleGoToVotingSite}
                 disabled={!selectedState}
-                className="w-full h-12 rounded-none text-base fontroboto shadow-none hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full h-8 rounded-none text-base fontroboto shadow-none hover:shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <Search size={18} className="mr-2" />
                 Go to Voting Site
