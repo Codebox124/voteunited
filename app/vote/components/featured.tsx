@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -39,6 +40,10 @@ interface Politician {
 }
 
 interface MemberDetails {
+  sponsoredLegislation: any;
+  state: string;
+  district: string;
+  cosponsoredLegislation: any;
   bioguideId: string;
   firstName?: string;
   middleName?: string;
@@ -161,7 +166,6 @@ const Featured = ({ politicians }: FeaturedProps) => {
           })
         );
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       console.error("Error fetching member details:", err);
     } finally {
@@ -176,6 +180,8 @@ const Featured = ({ politicians }: FeaturedProps) => {
       fetchMemberDetails(politician.external_id);
     }
   };
+
+  console.log("selectedMemberDetails", selectedMemberDetails);
   return (
     <div className="bg-background">
       <div className="max-w-7xl mx-auto px-4 pt-16 sm:px-6 lg:px-8">
@@ -348,18 +354,35 @@ const Featured = ({ politicians }: FeaturedProps) => {
                                 </div>
                               )}
 
-                              {!loadingDetails &&
-                                (selectedPolitician?.bio || politician.bio) && (
-                                  <div className="mt-4">
-                                    <div className="text-sm text-muted-foreground fontroboto mb-2">
-                                      Biography
-                                    </div>
-                                    <p className="text-sm text-foreground fontroboto leading-relaxed">
-                                      {selectedPolitician?.bio ||
-                                        politician.bio}
-                                    </p>
+                              {!loadingDetails && selectedMemberDetails && (
+                                <div className="mt-4">
+                                  <div className="text-sm text-muted-foreground fontroboto mb-2">
+                                    Biography
                                   </div>
-                                )}
+                                  <p className="text-sm text-foreground fontroboto leading-relaxed">
+                                    {selectedMemberDetails.firstName}{" "}
+                                    {selectedMemberDetails.middleName}.{" "}
+                                    {selectedMemberDetails.lastName}, born in{" "}
+                                    {selectedMemberDetails.birthYear}, is the
+                                    current Representative for{" "}
+                                    {selectedMemberDetails?.state}’s{" "}
+                                    {selectedMemberDetails?.district} district.
+                                    They have cosponsored{" "}
+                                    {
+                                      selectedMemberDetails
+                                        ?.cosponsoredLegislation?.count
+                                    }{" "}
+                                    pieces of legislation and sponsored{" "}
+                                    {
+                                      selectedMemberDetails
+                                        ?.sponsoredLegislation?.count
+                                    }{" "}
+                                    bill(s). You can learn more on their{" "}
+                                    official website:
+                                    {selectedMemberDetails?.officialWebsiteUrl}.
+                                  </p>
+                                </div>
+                              )}
                               <DialogFooter>
                                 <div className="flex gap-2 items-center">
                                   <Button
