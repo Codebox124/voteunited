@@ -14,7 +14,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useEffect, useState } from "react";
-import { upvoteMember } from "@/lib/api";
+import { upvoteMember, downvoteMember } from "@/lib/api";
 import toast from "react-hot-toast";
 
 const CONGRESS_API_KEY = "g4g9hInpzEbA7vb3j0rqCpNb40YcfUj2zRKed27i";
@@ -122,6 +122,31 @@ const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
         );
 
         toast.success("Vote successful! 🎉");
+      } else {
+        toast.error(res?.message || "You already voted ❌");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Something went wrong ❌");
+    } finally {
+      setLoadingId(null);
+    }
+  };
+
+  const handleDownvote = async (id: string | number) => {
+    try {
+      setLoadingId(id);
+
+      const res = await downvoteMember(id);
+
+      if (res?.success) {
+        setItems((prev) =>
+          prev.map((item) =>
+            item.id === id ? { ...item, votes: item.votes - 1 } : item
+          )
+        );
+
+        toast.success("Downvote successful! 👎");
       } else {
         toast.error(res?.message || "You already voted ❌");
       }
@@ -295,8 +320,14 @@ const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
                         aria-label={`Downvote ${politician.name}`}
                         className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-red-100"
                         variant="outline"
+                        disabled={loadingId === politician.id}
+                        onClick={() => handleDownvote(politician.id)}
                       >
-                        <ThumbsDown className="w-6 h-6" />
+                        {loadingId === politician.id ? (
+                          <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                        ) : (
+                          <ThumbsDown className="w-6 h-6" />
+                        )}
                       </Button>
                     </div>
                   </div>
@@ -394,8 +425,14 @@ const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
                           aria-label={`Downvote ${politician.name} from modal`}
                           className="text-primary hover:bg-primary/90 border border-primary rounded-none bg-transparent"
                           variant="outline"
+                          disabled={loadingId === politician.id}
+                          onClick={() => handleDownvote(politician.id)}
                         >
-                          <ThumbsDown className="w-6 h-6" />
+                          {loadingId === politician.id ? (
+                            <div className="animate-spin h-6 w-6 border-2 border-primary border-t-transparent rounded-full" />
+                          ) : (
+                            <ThumbsDown className="w-6 h-6" />
+                          )}
                         </Button>
                       </div>
                     </DialogFooter>
