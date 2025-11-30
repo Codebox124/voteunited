@@ -1,16 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import {
-  TrendingUp,
-  Vote,
-  Loader2,
-  AlertCircle,
-  Trophy,
-  Flag,
-  MapPin,
-  ThumbsUp,
-  ThumbsDown,
-} from "lucide-react";
+import { TrendingUp, Vote, Loader2, AlertCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import {
   Dialog,
@@ -23,576 +13,233 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { toast } from "sonner";
 
 const CURRENT_CONGRESS = "119";
-const CONGRESS_API_KEY = "g4g9hInpzEbA7vb3j0rqCpNb40YcfUj2zRKed27i";
 
 interface Politician {
   id: string;
-  memberId: number;
   name: string;
   position: string;
   image: string;
   votes: string;
-  votesCount: number;
   trending: boolean;
   rank: number;
   party?: string;
   state?: string;
   bio?: string;
-  bioguideId?: string;
 }
-
-interface MemberDetails {
-  bioguideId: string;
-  birthYear?: string;
-  officialWebsiteUrl?: string;
-  partyHistory?: Array<{
-    partyName: string;
-    partyAbbreviation: string;
-    startYear: number;
-  }>;
-  terms?: Array<{
-    chamber: string;
-    congress: number;
-    district?: number;
-    memberType: string;
-    startYear: number;
-    stateCode: string;
-    stateName: string;
-  }>;
-  depiction?: {
-    imageUrl: string;
-    attribution?: string;
-  };
-}
-
-interface VoteState {
-  [memberId: string]: "upvote" | "downvote" | null;
-}
-
-// Helper functions for localStorage
-const getVoteState = (): VoteState => {
-  if (typeof window === "undefined") return {};
-  const stored = localStorage.getItem("user_votes");
-  return stored ? JSON.parse(stored) : {};
-};
-
-const saveVoteState = (state: VoteState) => {
-  if (typeof window === "undefined") return;
-  localStorage.setItem("user_votes", JSON.stringify(state));
-};
-
-const getClientIP = async (): Promise<string> => {
-  try {
-    const response = await fetch("https://api.ipify.org?format=json");
-    const data = await response.json();
-    return data.ip;
-  } catch (error) {
-    console.error("Error fetching IP:", error);
-    return "127.0.0.1";
-  }
-};
 
 const PoliticianCard = ({
   politician,
   isTopRanked,
-  onOpenDialog,
-  onVote,
-  userVote,
 }: {
   politician: Politician;
   isTopRanked: boolean;
-  onOpenDialog: (bioguideId: string) => void;
-  onVote: (memberId: string, voteType: "upvote" | "downvote") => void;
-  userVote: "upvote" | "downvote" | null;
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [isVoting, setIsVoting] = useState(false);
-
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (open && politician.bioguideId) {
-      onOpenDialog(politician.bioguideId);
-    }
-  };
-
-  const handleVote = async (
-    e: React.MouseEvent,
-    voteType: "upvote" | "downvote"
-  ) => {
-    e.stopPropagation();
-    setIsVoting(true);
-    await onVote(politician.id, voteType);
-    setIsVoting(false);
-  };
-
-  return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
+}) => (
+  <Dialog>
+    <DialogTrigger asChild>
+      <div
+        className={
+          "bg-white dark:bg-slate-800 rounded-none mb-4 fontroboto overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 cursor-pointer"
+        }
+      >
         <div
           className={
-            "bg-white dark:bg-slate-800 rounded-none mb-4 fontroboto overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-200 dark:border-slate-700 cursor-pointer"
+            "relative from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden h-64"
           }
         >
-          <div
-            className={
-              "relative from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-800 overflow-hidden h-64"
-            }
-          >
-            <img
-              src={politician.image}
-              alt={politician.name}
-              className="w-full md:h-full h-[300px] object-fill"
-              onError={(e) => {
-                e.currentTarget.src = "/flag.png";
-              }}
-            />
-            <div className="absolute top-4 left-4 flex gap-2">
-              <span className="px-3 py-1 bg-slate-900/90 dark:bg-slate-100/90 text-white dark:text-slate-900 text-sm font-bold rounded-full">
-                #{politician.rank}
-              </span>
-              {politician.trending && (
-                <span className="px-3 py-1 bg-red-500/90 text-white text-sm font-semibold rounded-full flex items-center gap-1.5">
-                  <TrendingUp size={14} />
-                  Trending
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div
-            className={`p-6 ${
-              isTopRanked ? "flex flex-col justify-center" : ""
-            }`}
-          >
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-xl">
-                  {politician.name}
-                </h3>
-                <p className="text-slate-600 dark:text-slate-400 font-medium">
-                  {politician.position}
-                </p>
-                {politician.party && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
-                    {politician.party} • {politician.state}
-                  </p>
-                )}
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-4 text-sm text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-700">
-                <span className="flex items-center gap-1.5">
-                  <Vote size={16} className="text-slate-400" />
-                  {politician.votes} votes
-                </span>
-
-                {/* Vote Buttons */}
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={(e) => handleVote(e, "upvote")}
-                    disabled={isVoting}
-                    className={`p-2 rounded-lg transition-all ${
-                      userVote === "upvote"
-                        ? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-                        : "bg-slate-100 text-slate-600 hover:bg-green-50 hover:text-green-600 dark:bg-slate-700 dark:text-slate-400"
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <ThumbsUp size={16} />
-                  </button>
-                  <button
-                    onClick={(e) => handleVote(e, "downvote")}
-                    disabled={isVoting}
-                    className={`p-2 rounded-lg transition-all ${
-                      userVote === "downvote"
-                        ? "bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400"
-                        : "bg-slate-100 text-slate-600 hover:bg-red-50 hover:text-red-600 dark:bg-slate-700 dark:text-slate-400"
-                    } disabled:opacity-50 disabled:cursor-not-allowed`}
-                  >
-                    <ThumbsDown size={16} />
-                  </button>
-                </div>
-              </div>
-
-              <div className="w-full mt-4 px-6 py-3 bg-primary dark:bg-slate-100 text-white dark:text-slate-900 rounded-none font-semibold transition-all duration-200 flex items-center justify-center gap-2">
-                View Profile
-              </div>
-            </div>
-          </div>
-        </div>
-      </DialogTrigger>
-
-      <DialogContent className="sm:max-w-xl overflow-auto h-[90vh] rounded-none">
-        <DialogHeader>
-          <DialogTitle className="fontmont">{politician.name}</DialogTitle>
-          <DialogDescription className="fontroboto">
-            {politician.position}
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 fontroboto">
-          <div className="rounded-none border border-border overflow-hidden">
-            <img
-              src={politician.image}
-              alt={politician.name}
-              className="w-full md:h-full h-[300px] object-fill"
-              onError={(e) => {
-                e.currentTarget.src = "/flag.png";
-              }}
-            />
-          </div>
-          <div className="flex flex-col gap-4">
-            <div className="grid md:grid-cols-1 grid-cols-2 gap-3">
-              {/* Rank Card */}
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 flex items-center gap-3">
-                <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-full text-yellow-600 dark:text-yellow-400">
-                  <Trophy size={18} />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground fontroboto uppercase tracking-wider">
-                    Rank
-                  </div>
-                  <div className="text-lg font-bold text-foreground">
-                    #{politician.rank}
-                  </div>
-                </div>
-              </div>
-
-              {/* Votes Card */}
-              <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-full text-blue-600 dark:text-blue-400">
-                  <Vote size={18} />
-                </div>
-                <div>
-                  <div className="text-xs text-muted-foreground fontroboto uppercase tracking-wider">
-                    Votes
-                  </div>
-                  <div className="text-lg font-bold text-foreground">
-                    {politician.votes}
-                  </div>
-                </div>
-              </div>
-
-              {/* Party Card */}
-              {politician.party && (
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 flex items-center gap-3">
-                  <div
-                    className={`p-2 rounded-full ${
-                      politician.party === "Democratic"
-                        ? "bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
-                        : politician.party === "Republican"
-                        ? "bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400"
-                        : "bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400"
-                    }`}
-                  >
-                    <Flag size={18} />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground fontroboto uppercase tracking-wider">
-                      Party
-                    </div>
-                    <div className="text-sm font-bold text-foreground">
-                      {politician.party}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* State Card */}
-              {politician.state && (
-                <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-lg border border-slate-100 dark:border-slate-700 flex items-center gap-3">
-                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-full text-green-600 dark:text-green-400">
-                    <MapPin size={18} />
-                  </div>
-                  <div>
-                    <div className="text-xs text-muted-foreground fontroboto uppercase tracking-wider">
-                      State
-                    </div>
-                    <div className="text-lg font-bold text-foreground">
-                      {politician.state}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Trending Badge */}
+          <img
+            src={politician.image}
+            alt={politician.name}
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              e.currentTarget.src = "/flag.png";
+            }}
+          />
+          <div className="absolute top-4 left-4 flex gap-2">
+            <span className="px-3 py-1 bg-slate-900/90 dark:bg-slate-100/90 text-white dark:text-slate-900 text-sm font-bold rounded-full">
+              #{politician.rank}
+            </span>
             {politician.trending && (
-              <div className="w-full bg-gradient-to-r from-red-100 to-red-50 dark:from-red-900/20 dark:to-red-900/10 border border-red-200 dark:border-red-800/30 p-3 rounded-lg flex items-center justify-center gap-2 text-red-700 dark:text-red-400 font-medium">
-                <TrendingUp size={16} />
-                <span>Currently Trending in Polls</span>
-              </div>
+              <span className="px-3 py-1 bg-red-500/90 text-white text-sm font-semibold rounded-full flex items-center gap-1.5">
+                <TrendingUp size={14} />
+                Trending
+              </span>
             )}
           </div>
         </div>
-        {politician.bio && (
-          <div className="mt-4">
-            <div className="text-sm text-muted-foreground fontroboto mb-1">
-              Biography
+
+        <div
+          className={`p-6 ${isTopRanked ? "flex flex-col justify-center" : ""}`}
+        >
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-1 text-xl">
+                {politician.name}
+              </h3>
+              <p className="text-slate-600 dark:text-slate-400 font-medium">
+                {politician.position}
+              </p>
+              {politician.party && (
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                  {politician.party} • {politician.state}
+                </p>
+              )}
             </div>
-            <p className="text-sm text-foreground">{politician.bio}</p>
+
+            <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500 dark:text-slate-400 pt-2 border-t border-slate-200 dark:border-slate-700">
+              <span className="flex items-center gap-1.5">
+                <Vote size={16} className="text-slate-400" />
+                {politician.votes} votes
+              </span>
+            </div>
+
+            <div className="w-full mt-4 px-6 py-3 bg-primary dark:bg-slate-100 text-white dark:text-slate-900 rounded-none font-semibold transition-all duration-200 flex items-center justify-center gap-2">
+              View Profile
+            </div>
           </div>
-        )}
-        <DialogFooter>
-          <Link href={"/vote"}>
-            <Button className="rounded-none">Vote Now</Button>
-          </Link>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-};
+        </div>
+      </div>
+    </DialogTrigger>
+
+    <DialogContent className="sm:max-w-xl">
+      <DialogHeader>
+        <DialogTitle className="fontmont">{politician.name}</DialogTitle>
+        <DialogDescription className="fontroboto">
+          {politician.position}
+        </DialogDescription>
+      </DialogHeader>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="rounded-none border border-border overflow-hidden">
+          <img
+            src={politician.image}
+            alt={politician.name}
+            className="w-full h-full object-contain"
+            onError={(e) => {
+              e.currentTarget.src = "/flag.png";
+            }}
+          />
+        </div>
+        <div className="space-y-2">
+          <div className="text-sm text-muted-foreground fontroboto">Rank</div>
+          <div className="text-lg font-semibold text-foreground">
+            #{politician.rank}
+          </div>
+          {politician.party && (
+            <>
+              <div className="text-sm text-muted-foreground fontroboto">
+                Party
+              </div>
+              <div className="text-lg font-semibold text-foreground">
+                {politician.party}
+              </div>
+            </>
+          )}
+          {politician.state && (
+            <>
+              <div className="text-sm text-muted-foreground fontroboto">
+                State
+              </div>
+              <div className="text-lg font-semibold text-foreground">
+                {politician.state}
+              </div>
+            </>
+          )}
+          <div className="text-sm text-muted-foreground fontroboto">Votes</div>
+          <div className="text-lg font-semibold text-primary fontmont">
+            {politician.votes}
+          </div>
+          {politician.trending && (
+            <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm text-secondary-foreground">
+              <TrendingUp size={14} /> Trending
+            </div>
+          )}
+        </div>
+      </div>
+      {politician.bio && (
+        <div className="mt-4">
+          <div className="text-sm text-muted-foreground fontroboto mb-1">
+            Biography
+          </div>
+          <p className="text-sm text-foreground">{politician.bio}</p>
+        </div>
+      )}
+      <DialogFooter>
+        <Link href={"/vote"}>
+          <Button className="rounded-none">Vote Now</Button>
+        </Link>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+);
 
 const Politicians = () => {
   const [politicians, setPoliticians] = useState<Politician[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<string>("all");
-  const [selectedMemberDetails, setSelectedMemberDetails] =
-    useState<MemberDetails | null>(null);
-  const [loadingDetails, setLoadingDetails] = useState<boolean>(false);
-  const [userVotes, setUserVotes] = useState<VoteState>({});
 
   useEffect(() => {
     fetchCongressMembers();
-    setUserVotes(getVoteState());
   }, []);
 
-  const fetchCongressMembers = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await fetch("https://voteunited.buyjet.ng/api/members");
+const fetchCongressMembers = async () => {
+  try {
+    setLoading(true);
+    setError(null);
+    const response = await fetch("https://voteunited.buyjet.ng/api/members");
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
-      }
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
 
-      const data = await response.json();
-      const members = data?.members || [];
+    const data = await response.json();
+    console.log("API RESPONSE:", data);
 
-      if (!Array.isArray(members)) {
-        throw new Error("Members data is not an array");
-      }
+    // 🛠 FIX: members is a direct array, not nested under data
+    const members = data?.members || [];
 
-      const transformedPoliticians: Politician[] = members.map(
-        (member: any, index: number) => {
-          const latestTerm = member.terms?.[0];
+    if (!Array.isArray(members)) {
+      throw new Error("Members data is not an array");
+    }
 
-          let position = "Member of Congress";
-          if (latestTerm?.chamber === "Senate") {
-            position = "U.S. Senator";
-          } else if (latestTerm?.chamber === "House of Representatives") {
-            position = "U.S. Representative";
-          }
+    const transformedPoliticians: Politician[] = members.map(
+      (member: any, index: number) => {
+        const latestTerm = member.terms?.[0];
 
-          const votesCount = member.votes_count || 0;
-
-          return {
-            id: member.external_id,
-            memberId: member.id,
-            name: member.name,
-            position,
-            image: member.image_url,
-            party: member.party,
-            state: member.state,
-            district: member.district,
-            votes: votesCount.toLocaleString(),
-            votesCount: votesCount,
-            trending: Math.random() > 0.7,
-            rank: index + 1,
-            bio: member.source_url ? `Source: ${member.source_url}` : "",
-            bioguideId: member.external_id,
-          };
+        let position = "Member of Congress";
+        if (latestTerm?.chamber === "Senate") {
+          position = "U.S. Senator";
+        } else if (latestTerm?.chamber === "House of Representatives") {
+          position = "U.S. Representative";
         }
-      );
 
-      setPoliticians(transformedPoliticians);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchMemberDetails = async (bioguideId: string) => {
-    try {
-      setLoadingDetails(true);
-      const response = await fetch(
-        `https://api.congress.gov/v3/member/${bioguideId}?format=json&api_key=${CONGRESS_API_KEY}`
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch member details: ${response.status}`);
+        return {
+          id: member.external_id,
+          name: member.name,
+          position,
+          image: member.image_url,
+          party: member.party,
+          state: member.state,
+          district: member.district, // Added district field
+          votes: member.votes_count?.toLocaleString() || "0",
+          trending: Math.random() > 0.7,
+          rank: index + 1,
+          bio: member.source_url ? `Source: ${member.source_url}` : "",
+        };
       }
+    );
 
-      const data = await response.json();
+    setPoliticians(transformedPoliticians);
+  } catch (err: any) {
+    console.error(err);
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
-      if (data.member) {
-        setSelectedMemberDetails(data.member);
 
-        setPoliticians((prev) =>
-          prev.map((p) => {
-            if (p.bioguideId === bioguideId) {
-              const member = data.member;
-              const partyInfo = member.partyHistory?.[0];
-              const termInfo = member.terms?.[0];
-
-              let bioText = `${member.firstName || ""} ${
-                member.middleName || ""
-              } ${member.lastName || ""}`;
-
-              if (member.birthYear) {
-                bioText += ` was born in ${member.birthYear}.`;
-              }
-
-              if (partyInfo) {
-                bioText += ` Member of the ${partyInfo.partyName} party since ${partyInfo.startYear}.`;
-              }
-
-              if (termInfo) {
-                bioText += ` Currently serving in the ${termInfo.chamber}`;
-                if (termInfo.district) {
-                  bioText += `, representing District ${termInfo.district} of ${termInfo.stateName}`;
-                } else {
-                  bioText += ` representing ${termInfo.stateName}`;
-                }
-                bioText += `.`;
-              }
-
-              if (member.officialWebsiteUrl) {
-                bioText += ` Official website: ${member.officialWebsiteUrl}`;
-              }
-
-              return { ...p, bio: bioText };
-            }
-            return p;
-          })
-        );
-      }
-    } catch (err: any) {
-      console.error("Error fetching member details:", err);
-    } finally {
-      setLoadingDetails(false);
-    }
-  };
-
-  const handleVote = async (
-    memberId: string,
-    voteType: "upvote" | "downvote"
-  ) => {
-    const currentVote = userVotes[memberId];
-
-    // Prevent duplicate votes
-    if (currentVote === voteType) {
-      toast.error(`You already ${voteType}d this member`);
-      return;
-    }
-
-    // Find the politician to get their numeric memberId
-    const politician = politicians.find((p) => p.id === memberId);
-    if (!politician) {
-      toast.error("Member not found");
-      return;
-    }
-
-    try {
-      const ip = await getClientIP();
-
-      // Optimistic UI update
-      setPoliticians((prev) =>
-        prev.map((p) => {
-          if (p.id === memberId) {
-            let newVotesCount = p.votesCount;
-
-            // Remove previous vote effect
-            if (currentVote === "upvote") {
-              newVotesCount -= 1;
-            } else if (currentVote === "downvote") {
-              newVotesCount += 1;
-            }
-
-            // Apply new vote effect
-            if (voteType === "upvote") {
-              newVotesCount += 1;
-            } else if (voteType === "downvote") {
-              newVotesCount -= 1;
-            }
-
-            return {
-              ...p,
-              votesCount: Math.max(0, newVotesCount),
-              votes: Math.max(0, newVotesCount).toLocaleString(),
-            };
-          }
-          return p;
-        })
-      );
-
-      // Update local storage
-      const newVoteState = { ...userVotes, [memberId]: voteType };
-      setUserVotes(newVoteState);
-      saveVoteState(newVoteState);
-
-      // Make API call
-      const endpoint = voteType === "upvote" ? "/api/upvote" : "/api/downvote";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          member_id: politician.memberId,
-          ip: ip,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Failed to ${voteType}`);
-      }
-
-      const data = await response.json();
-      toast.success(data.message || `Successfully ${voteType}d!`);
-    } catch (err: any) {
-      console.error(`Error ${voteType}ing:`, err);
-      toast.error(`Failed to ${voteType}. Please try again.`);
-
-      // Revert optimistic update on error
-      setPoliticians((prev) =>
-        prev.map((p) => {
-          if (p.id === memberId) {
-            let revertedCount = p.votesCount;
-
-            // Revert the vote change
-            if (voteType === "upvote") {
-              revertedCount -= 1;
-            } else if (voteType === "downvote") {
-              revertedCount += 1;
-            }
-
-            // Restore previous vote if existed
-            if (currentVote === "upvote") {
-              revertedCount += 1;
-            } else if (currentVote === "downvote") {
-              revertedCount -= 1;
-            }
-
-            return {
-              ...p,
-              votesCount: Math.max(0, revertedCount),
-              votes: Math.max(0, revertedCount).toLocaleString(),
-            };
-          }
-          return p;
-        })
-      );
-
-      // Revert vote state
-      setUserVotes(userVotes);
-      saveVoteState(userVotes);
-    }
-  };
 
   const filteredPoliticians = politicians.filter((p: Politician) => {
     if (filter === "all") return true;
@@ -604,7 +251,7 @@ const Politicians = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen  from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex flex-col items-center justify-center min-h-[400px]">
             <Loader2 className="w-12 h-12 animate-spin text-primary" />
@@ -619,7 +266,7 @@ const Politicians = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen  from-slate-50 to-white dark:from-slate-900 dark:to-slate-800 pt-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex flex-col items-center justify-center min-h-[400px]">
             <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
@@ -630,6 +277,27 @@ const Politicians = () => {
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                 {error}
               </p>
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-200 dark:border-blue-800 text-left">
+                <p className="text-sm text-blue-800 dark:text-blue-200 mb-2">
+                  <strong>Setup Instructions:</strong>
+                </p>
+                <ol className="text-xs text-blue-700 dark:text-blue-300 space-y-1 list-decimal list-inside">
+                  <li>
+                    Sign up for a free API key at:{" "}
+                    <a
+                      href="https://api.congress.gov/sign-up/"
+                      target="_blank"
+                      className="underline"
+                    >
+                      api.congress.gov/sign-up
+                    </a>
+                  </li>
+                  <li>
+                    Replace YOUR_API_KEY_HERE in the code with your actual key
+                  </li>
+                  <li>The API allows 5,000 requests per hour</li>
+                </ol>
+              </div>
               <Button
                 onClick={fetchCongressMembers}
                 className="mt-4 rounded-none"
@@ -725,9 +393,6 @@ const Politicians = () => {
                   key={politician.id}
                   politician={politician}
                   isTopRanked={index === 0}
-                  onOpenDialog={fetchMemberDetails}
-                  onVote={handleVote}
-                  userVote={userVotes[politician.id] || null}
                 />
               )
             )}
