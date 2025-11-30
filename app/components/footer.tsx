@@ -87,7 +87,7 @@ export default function Footer() {
             <div className="flex items-center gap-2">
               <div className="flex gap-3 text-muted-foreground">
                 <Link
-                  href="#"
+                  href="https://x.com/voteunitednews"
                   aria-label="Twitter"
                   className="hover:text-primary"
                 >
