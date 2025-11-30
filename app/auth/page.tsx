@@ -3,8 +3,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { GoogleOAuthProvider, useGoogleLogin } from "@react-oauth/google";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const GoogleLoginButton = () => {
+  const router = useRouter();
   const login = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       console.log(tokenResponse);
@@ -29,9 +31,9 @@ const GoogleLoginButton = () => {
         const data = await response.json();
         toast.success("Login successful!");
         console.log("Login success:", data);
-        // You might want to store the token and redirect here
-        // localStorage.setItem('token', data.token);
-        // router.push('/dashboard');
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("user", JSON.stringify(data.user));
+        router.push("/");
       } catch (error) {
         console.error("Login failed:", error);
         toast.error("Login failed. Please try again.");
