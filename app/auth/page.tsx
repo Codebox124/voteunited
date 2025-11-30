@@ -82,18 +82,6 @@ const LoginPage: React.FC = () => {
           <div className="flex flex-col items-center">
             <GoogleLoginButton />
           </div>
-
-          <div className="mt-6">
-            <p className="text-center text-sm text-gray-600">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/signup"
-                className="font-medium text-gray-600 hover:text-gray-500 transition-colors"
-              >
-                Create account
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </GoogleOAuthProvider>
