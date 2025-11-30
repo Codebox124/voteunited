@@ -106,7 +106,7 @@ const Page = () => {
     <div>
       <div className="md:max-w-7xl max-w-full mx-auto text-center p-10">
         <h2 className="text-4xl md:text-5xl font-mont font-bold text-primary dark:text-white mb-4">
-          Make Your Voice Heard
+          Make Your Voice be Heard
         </h2>
         <p className="text-lg text-slate-600 fontroboto dark:text-slate-400 max-w-2xl mx-auto">
           Find your polling station, explore candidates, and cast your vote for

@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     console.log("Downvote request body:", body);
 
     const response = await fetch(
-      "https://www.voteunited.com/api/downvote-member",
+      "https://www.admin.voteunited.com/api/downvote-member",
       {
         method: "POST",
         headers: {

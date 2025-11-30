@@ -148,7 +148,7 @@ const AllPolitician = ({ politicians = [] }: AllPoliticianProps) => {
 
         toast.success(res?.message);
       } else {
-        toast(res?.message || "You already voted ❌");
+        toast(res?.message);
       }
     } catch (err) {
       console.error(err);

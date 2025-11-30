@@ -46,10 +46,7 @@ export default function Navbar() {
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 font-mont">
-            <Image src="/flag.png" alt="flag" width={24} height={34} />
-            <span className=" text-xl font-bold text-primary sm:inline">
-              Vote United
-            </span>
+            <Image src="/logo.jpg" alt="logo" width={100} height={100} />
           </Link>
 
           {/* Desktop Navigation */}

@@ -7,7 +7,7 @@ export async function POST(req: Request) {
     console.log("Upvote request body:", body);
 
     const response = await fetch(
-      "https://www.voteunited.com/api/upvote-member",
+      "https://www.admin.voteunited.com/api/upvote-member",
       {
         method: "POST",
         headers: {
@@ -17,6 +17,7 @@ export async function POST(req: Request) {
         body: JSON.stringify(body),
       }
     );
+    console.log("Upvote response:", response);
 
     console.log("Upvote response status:", response.status);
 
