@@ -85,7 +85,6 @@ export default function Footer() {
               Get weekly updates on candidates and voting resources.
             </p>
             <div className="flex items-center gap-2">
-              <Button className="rounded-none">Subscribe</Button>
               <div className="flex gap-3 text-muted-foreground">
                 <Link
                   href="#"
@@ -96,7 +95,7 @@ export default function Footer() {
                 </Link>
 
                 <Link
-                  href="#"
+                  href="mailto:info@voteunited.com"
                   aria-label="Email"
                   className="hover:text-primary"
                 >
