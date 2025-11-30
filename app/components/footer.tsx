@@ -13,10 +13,7 @@ export default function Footer() {
           {/* Brand */}
           <div>
             <Link href="/" className="flex items-center gap-2">
-              <Image src="/flag.png" alt="flag" width={24} height={34} />
-              <span className="text-xl font-bold text-primary fontmont">
-                Vote United
-              </span>
+              <Image src="/logo.jpg" alt="logo" width={100} height={100} />
             </Link>
             <p className="mt-3 text-sm text-muted-foreground max-w-xs">
               Empowering citizens to make informed political choices.
