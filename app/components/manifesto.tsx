@@ -2,15 +2,9 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { XCircle, Target, TrendingUp, Cog, Lightbulb } from "lucide-react";
+import { Target, TrendingUp, Cog } from "lucide-react";
 
 const Manifesto = () => {
-  const rejections = [
-    "Ideological Purity over practical results",
-    "Political Theater over factual analysis",
-    "The Demonization of those who disagree",
-  ];
-
   const pillars = [
     {
       icon: Target,
