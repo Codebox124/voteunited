@@ -126,7 +126,7 @@ const US_STATES = [
   {
     name: "Texas",
     abbr: "TX",
-    voteUrl: "https://www.sos.texas.gov/elections/",
+    voteUrl: "https://goelect.txelections.civixapps.com/ivis-mvp-ui/#/login",
   },
   { name: "Utah", abbr: "UT", voteUrl: "https://elections.utah.gov/" },
   {
