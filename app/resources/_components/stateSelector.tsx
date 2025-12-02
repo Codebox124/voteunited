@@ -48,12 +48,17 @@ const US_STATES = [
   },
   { name: "Georgia", abbr: "GA", voteUrl: "https://sos.ga.gov/elections" },
   { name: "Hawaii", abbr: "HI", voteUrl: "https://elections.hawaii.gov/" },
-  { name: "Idaho", abbr: "ID", voteUrl: "https://sos.idaho.gov/elections/" },
+  {
+    name: "Idaho",
+    abbr: "ID",
+    voteUrl:
+      "https://elections.sos.idaho.gov/ElectionLink/ElectionLink/ApplicationInstructions.aspx",
+  },
   { name: "Illinois", abbr: "IL", voteUrl: "https://www.elections.il.gov/" },
   { name: "Indiana", abbr: "IN", voteUrl: "https://www.in.gov/sos/elections/" },
   { name: "Iowa", abbr: "IA", voteUrl: "https://sos.iowa.gov/elections/" },
   { name: "Kansas", abbr: "KS", voteUrl: "https://sos.ks.gov/elections/" },
-  { name: "Kentucky", abbr: "KY", voteUrl: "https://elect.ky.gov/" },
+  { name: "Kentucky", abbr: "KY", voteUrl: "https://vrsws.sos.ky.gov/ovrweb/" },
   {
     name: "Louisiana",
     abbr: "LA",
