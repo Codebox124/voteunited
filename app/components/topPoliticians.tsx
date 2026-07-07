@@ -195,7 +195,7 @@ const TopPoliticians = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch("https://voteunited.buyjet.ng/api/members");
+      const response = await fetch("https://admin.voteunited.com/api/members");
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
